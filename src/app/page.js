@@ -1,11 +1,17 @@
 'use client';
 import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinata";
 import { useState, useEffect } from "react";
+import { signIn, signOut, useSession } from "next-auth/react"
 
 export default function Home() {
+  const { data: session } = useSession()
   const [ipfsId, setIpfsId] = useState("");
   const [fetchedData, setFetchedData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    console.log(session);
+  }, [session]);
 
   // Example JSON data to upload
   const exampleData = {
@@ -82,7 +88,20 @@ export default function Home() {
   return (
     <div className="min-h-screen p-8">      
       <div className="space-y-4">
-        <button 
+        {session ? (
+          <div className="flex-col items-center gap-4">
+            <div className="flex-col w-56 mb-12">
+            <img src={session.user.image} className="rounded-full w-40 mb-4"></img>
+            <h1 className="font-bold text-4xl mb-2">{session.user.name}</h1>
+            <p className="text-l mb-4">{session.user.email}</p>
+            <button
+              onClick={() => signOut()}
+              className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
+            >
+              Sign Out
+            </button>
+            </div>
+            <button 
           onClick={handleUpload}
           disabled={loading}
           className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
@@ -121,6 +140,15 @@ export default function Home() {
               {JSON.stringify(fetchedData, null, 2)}
             </pre>
           </div>
+        )}
+          </div>
+        ) : (
+          <button
+            onClick={() => signIn('github')}
+            className="px-4 py-2 bg-gray-800 text-white rounded cursor-pointer"
+          >
+            Sign In with GitHub
+          </button>
         )}
       </div>
     </div>
