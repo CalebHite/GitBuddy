@@ -6,12 +6,14 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const profileTitle = isCurrentUser ? `${user?.name}'s Profile` : 'My Profile';
+
   useEffect(() => {
     const fetchUserPosts = async () => {
       try {
         // Fetch all pinned items
         const response = await fetchAllFromIPFS();
-        
+
         if (response.success) {
           // First fetch content for all posts
           const postPromises = response.data.map(async (item) => {
@@ -32,7 +34,7 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
           const posts = (await Promise.all(postPromises))
             .filter(post => post !== null && post.email?.toLowerCase() === user?.email?.toLowerCase())
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          
+
           setUserPosts(posts);
         }
       } catch (error) {
@@ -49,12 +51,24 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-4 p-4 border rounded-lg bg-gray-50">
-      <h1 className="text-3xl font-bold mb-8 text-center">My Profile</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">{profileTitle}</h1>
       {/* User Info Section */}
-      <div className="flex items-center gap-4 mb-6">
-        {user?.image && (
-          <img src={user.image} alt="Profile" className="w-12 h-12 rounded-full" />
-        )}
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <DotLottieReact 
+            src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie" 
+            loop 
+            autoplay 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24" 
+          />
+          {user?.image && (
+            <img 
+              src={user.image} 
+              alt="Profile" 
+              className="w-12 h-12 rounded-full relative" 
+            />
+          )}
+        </div>
         <div>
           <h2 className="text-xl font-semibold">{user?.name}</h2>
           <p className="text-gray-600">{user?.email}</p>
@@ -62,10 +76,10 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
       </div>
 
       {/* Only show Sign Out button if it's the current user's profile */}
-      {isCurrentUser && (
+      {!isCurrentUser && (
         <button
           onClick={() => signOut()}
-          className="mb-6 px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700"
+          className="mb-3 mt-3 px-4 py-2 border text-black rounded cursor-pointer hover:bg-red-200"
         >
           Sign Out
         </button>
@@ -98,7 +112,6 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
                 <p className="text-sm text-gray-400 mt-2">
                   Posted on: {new Date(post.timestamp).toLocaleDateString()}
                 </p>
-                <DotLottieReact src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie" loop autoplay/>
               </div>
             ))}
           </div>
