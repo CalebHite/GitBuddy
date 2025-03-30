@@ -6,7 +6,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
 import UserProfile from "./components/userProfile";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Globe, UserRound, UserRoundX } from "lucide-react";
+import { Plus, Globe, UserRound } from "lucide-react";
 import ExplorePage from "./components/explorePage";
 import LoginPage from "./components/LoginPage";
 

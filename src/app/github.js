@@ -1,4 +1,3 @@
-// Method 2: Using Axios (requires npm install axios)
 import axios from 'axios';
 
 export async function getLatestCommit(email) {
@@ -18,9 +17,9 @@ export async function getLatestCommit(email) {
 
     const username = searchResponse.data.items[0].login;
 
-    // Fetch user's repositories sorted by most recently updated
+    // Fetch all user's repositories (without sorting by 'updated')
     const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`, {
-      params: { sort: 'updated' }
+      params: { per_page: 100 }  // Fetch up to 100 repos (increase if needed)
     });
     const repos = reposResponse.data;
 
@@ -29,37 +28,53 @@ export async function getLatestCommit(email) {
       throw new Error('No repositories found for this user');
     }
 
-    // Get the most recently updated repository
-    const mostRecentRepo = repos[0];
+    let latestCommit = null;
 
-    // Fetch the most recent commit with detailed information
-    const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${mostRecentRepo.name}/commits`, {
-      params: { per_page: 1 }
-    });
-    const commits = commitsResponse.data;
+    // Loop through each repository and fetch the latest commit from each one
+    for (const repo of repos) {
+      const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${repo.name}/commits`, {
+        params: { per_page: 1 }
+      });
+      
+      const commits = commitsResponse.data;
+      
+      if (commits.length > 0) {
+        const commit = commits[0];
+        // Compare commits to find the most recent one
+        if (!latestCommit || new Date(commit.commit.author.date) > new Date(latestCommit.commitDate)) {
+          // Fetch detailed commit information
+          const commitDetailsResponse = await axios.get(commit.url);
+          const commitDetails = commitDetailsResponse.data;
 
-    // Get the detailed commit information including file changes
-    const commitDetailsResponse = await axios.get(commits[0].url);
-    const commitDetails = commitDetailsResponse.data;
+          latestCommit = {
+            repository: repo.name,
+            commitSha: commit.sha,
+            commitMessage: commit.commit.message,
+            commitDate: commit.commit.author.date,
+            commitUrl: commit.html_url,
+            files: commitDetails.files.map(file => ({
+              filename: file.filename,
+              status: file.status,
+              additions: file.additions,
+              deletions: file.deletions,
+              changes: file.changes,
+              patch: file.patch
+            }))
+          };
+        }
+      }
+    }
 
-    // Return the most recent commit details with file changes
-    return {
-      repository: mostRecentRepo.name,
-      commitSha: commits[0].sha,
-      commitMessage: commits[0].commit.message,
-      commitDate: commits[0].commit.author.date,
-      commitUrl: commits[0].html_url,
-      files: commitDetails.files.map(file => ({
-        filename: file.filename,
-        status: file.status,
-        additions: file.additions,
-        deletions: file.deletions,
-        changes: file.changes,
-        patch: file.patch // This contains the actual code changes
-      }))
-    };
+    // If no commits were found across repositories
+    if (!latestCommit) {
+      throw new Error('No commits found for this user');
+    }
+
+    return latestCommit;
+
   } catch (error) {
     console.error('Error fetching latest commit:', error);
     throw error;
   }
 }
+  
