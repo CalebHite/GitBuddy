@@ -2,6 +2,7 @@
 import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinata";
 import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react"
+import CreatePost from "./components/createPost";
 
 export default function Home() {
   const { data: session } = useSession()
@@ -90,57 +91,7 @@ export default function Home() {
       <div className="space-y-4">
         {session ? (
           <div className="flex-col items-center gap-4">
-            <div className="flex-col w-56 mb-12">
-            <img src={session.user.image} className="rounded-full w-40 mb-4"></img>
-            <h1 className="font-bold text-4xl mb-2">{session.user.name}</h1>
-            <p className="text-l mb-4">{session.user.email}</p>
-            <button
-              onClick={() => signOut()}
-              className="px-4 py-2 bg-red-500 text-white rounded cursor-pointer"
-            >
-              Sign Out
-            </button>
-            </div>
-            <button 
-          onClick={handleUpload}
-          disabled={loading}
-          className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-        >
-          Upload Example JSON
-        </button>
-
-        <button 
-          onClick={handleFetch}
-          disabled={loading || !ipfsId}
-          className="px-4 py-2 bg-green-500 text-white rounded ml-2 cursor-pointer"
-        >
-          Fetch Data
-        </button>
-
-        <button 
-          onClick={handleDelete}
-          disabled={loading || !ipfsId}
-          className="px-4 py-2 bg-red-500 text-white rounded ml-2 cursor-pointer"
-        >
-          Delete Data
-        </button>
-
-        {loading && <p>Loading...</p>}
-        
-        {ipfsId && (
-          <div className="mt-4">
-            <p>Current Unique ID: {ipfsId}</p>
-          </div>
-        )}
-
-        {fetchedData && (
-          <div className="mt-4">
-            <h2 className="text-xl font-bold">Fetched Data:</h2>
-            <pre className="bg-gray-100 p-4 rounded mt-2">
-              {JSON.stringify(fetchedData, null, 2)}
-            </pre>
-          </div>
-        )}
+            <CreatePost session={session} />
           </div>
         ) : (
           <button
