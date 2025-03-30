@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import PostPreview from "./postPreview";
 import { fetchAllFromIPFS, fetchFromIPFSById } from "../pinata";
 import ViewPost from "./ViewPost";
-import UserProfile from "./UserProfile";
+import UserProfile from "./userProfile";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ExplorePage({ session }) {

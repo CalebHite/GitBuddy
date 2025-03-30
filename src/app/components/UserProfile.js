@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const UserProfile = ({ user, isCurrentUser = false }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -97,6 +98,7 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
                 <p className="text-sm text-gray-400 mt-2">
                   Posted on: {new Date(post.timestamp).toLocaleDateString()}
                 </p>
+                <DotLottieReact src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie" loop autoplay/>
               </div>
             ))}
           </div>
