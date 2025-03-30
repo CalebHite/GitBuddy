@@ -91,7 +91,7 @@ export default function Home() {
   // Helper function to toggle tabs
   const toggleTab = (tabName) => {
     if (activeTab === tabName) {
-      setActiveTab(null);
+      setActiveTab('explore');
     } else {
       setActiveTab(tabName);
     }

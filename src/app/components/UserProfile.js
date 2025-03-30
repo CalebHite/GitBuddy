@@ -16,6 +16,7 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
           const userPostPromises = response.data
             .filter(item => {
               // Check if the item has metadata and matches the user's email
+              console.log(item.metadata?.keyvalues?.userEmail === user?.email);
               return item.metadata?.keyvalues?.userEmail === user?.email;
             })
             .map(async (item) => {
