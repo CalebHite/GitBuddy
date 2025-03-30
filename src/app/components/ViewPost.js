@@ -8,8 +8,6 @@ export default function ViewPost({ post, onAvatarClick, isPersonal = false, stre
     return <div className="text-center text-gray-500">No post data available</div>;
   }
 
-  console.log("Post data in ViewPost:", post); // Debug log
-
   // Construct user object from post data
   const userInfo = {
     name: post.userName,

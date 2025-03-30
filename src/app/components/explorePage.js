@@ -22,18 +22,14 @@ export default function ExplorePage({ session }) {
       try {
         setLoading(true);
         const response = await fetchAllFromIPFS();
-        console.log("IPFS Response:", response);
 
         if (response.success && Array.isArray(response.data)) {
-          // Now response.data should be the array of pins
           setPosts(response.data);
 
           // Fetch content for each pin
           const postPromises = response.data.map(async (pin) => {
             try {
-              console.log("Processing pin:", pin);
               const contentResponse = await fetchFromIPFS(pin.ipfs_pin_hash);
-              console.log("Content response for pin:", contentResponse);
 
               if (contentResponse.success && contentResponse.data) {
                 return {
@@ -44,7 +40,6 @@ export default function ExplorePage({ session }) {
               }
               return null;
             } catch (error) {
-              console.error(`Failed to fetch content for pin ${pin.ipfs_pin_hash}:`, error);
               return null;
             }
           });
@@ -53,13 +48,11 @@ export default function ExplorePage({ session }) {
             .filter(post => post !== null)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-          console.log("Resolved posts:", resolvedPosts);
           setDecodedPosts(resolvedPosts);
         } else {
           throw new Error(response.message || "Failed to fetch posts from IPFS");
         }
       } catch (error) {
-        console.error("Failed to fetch posts:", error);
         setError(error.message);
       } finally {
         setLoading(false);
@@ -123,11 +116,6 @@ export default function ExplorePage({ session }) {
       </div>
     );
   }
-
-  // Debug information about posts
-  console.log("Current decoded posts:", decodedPosts);
-  console.log("Current post index:", currentPostIndex);
-  console.log("Current post:", decodedPosts[currentPostIndex]);
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-8 border rounded-lg bg-gray-50">

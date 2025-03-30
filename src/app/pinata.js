@@ -100,9 +100,6 @@ export async function fetchAllFromIPFS() {
             }
         );
 
-        // Log the response for debugging
-        console.log("Pinata Response:", response.data);
-
         // Check if the response has the expected structure
         if (response.data && Array.isArray(response.data.rows)) {
             return {
@@ -128,7 +125,6 @@ export async function fetchAllFromIPFS() {
 // Fetch specific item from IPFS by hash
 export async function fetchFromIPFS(ipfsHash) {
     try {
-        console.log("Fetching from IPFS hash:", ipfsHash);
         const response = await axios.get(`https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
         
         return {
