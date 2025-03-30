@@ -48,8 +48,15 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           },
         }));
       } catch (error) {
-        console.error("Error fetching GitHub commit:", error);
-        setError("Failed to fetch commit data");
+        console.error("Detailed error in fetchGithubCommit:", {
+          message: error.message,
+          stack: error.stack,
+          sessionData: {
+            hasEmail: !!session?.user?.email,
+            hasAccessToken: !!session?.user?.accessToken
+          }
+        });
+        setError(`Failed to fetch commit data: ${error.message}`);
       } finally {
         setLoading(false);
       }

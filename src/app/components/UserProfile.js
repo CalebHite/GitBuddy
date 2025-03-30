@@ -179,7 +179,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
       )}
 
       {/* Only show Sign Out button if it's the current user's profile */}
-      {!isCurrentUser && (
+      {isCurrentUser && (
         <button
           onClick={() => signOut()}
           className="mb-3 mt-3 px-4 py-2 border text-black rounded cursor-pointer hover:bg-red-200"

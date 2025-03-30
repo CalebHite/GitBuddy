@@ -39,6 +39,17 @@ export default function Home() {
     connectWallet();
   }, [session]); // Reconnect when session changes
 
+  useEffect(() => {
+    if (session) {
+      console.log("Session data:", {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasAccessToken: !!session?.user?.accessToken,
+        email: session?.user?.email
+      });
+    }
+  }, [session]);
+
   // Helper function to toggle tabs
   const toggleTab = (tabName) => {
     if (activeTab !== tabName) {
@@ -126,7 +137,13 @@ export default function Home() {
             <UserProfile user={session.user} isCurrentUser={true} signer={signer} />
           ) : activeTab === 'create' ? (
             <CreatePost 
-              session={session} 
+              session={{
+                ...session,
+                user: {
+                  ...session.user,
+                  accessToken: session?.user?.accessToken
+                }
+              }} 
               signer={signer} 
               onPostCreated={handlePostCreated}
             />
