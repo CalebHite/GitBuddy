@@ -3,9 +3,11 @@ import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinat
 import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react"
 import CreatePost from "./components/createPost";
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-export default function Home() {
-  const { data: session } = useSession()
+export default async function Home() {
+  const session = await getServerSession(authOptions);
   const [ipfsId, setIpfsId] = useState("");
   const [fetchedData, setFetchedData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -92,6 +94,7 @@ export default function Home() {
         {session ? (
           <div className="flex-col items-center gap-4">
             <CreatePost session={session} />
+            <UserProfile user={session?.user} />
           </div>
         ) : (
           <button
