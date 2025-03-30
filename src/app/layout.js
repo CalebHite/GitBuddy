@@ -2,6 +2,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getServerSession } from "next-auth"
 import SessionProvider from "./components/SessionProvider"
+import { Toaster } from "@/components/ui/sonner"
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Boilerplate Code",
-  description: "",
+  title: "GitBuddy",
+  description: "Built for the Midwest Blockathon",
 };
 
 export default async function RootLayout({ children }) {
@@ -28,6 +30,7 @@ export default async function RootLayout({ children }) {
       >
         <SessionProvider session={session}>
           {children}
+          <Toaster />
         </SessionProvider>
       </body>
     </html>

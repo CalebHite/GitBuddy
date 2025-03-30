@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { checkAndFollowUser } from '../github';
 import { ethers } from 'ethers';
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
+import { UserPlus } from "lucide-react";
 
 const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -140,6 +142,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           <h2 className="text-xl font-semibold">{user?.name}</h2>
           <p className="text-gray-600">{user?.email}</p>
         </div>
+        <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>
       </div>
 
       {/* Wallet Connection Section */}

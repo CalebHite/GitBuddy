@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import PostPreview from "./postPreview"
 import { uploadJsonToIPFS } from "../pinata"
@@ -9,6 +9,9 @@ import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner"
+import ConfettiComponent from './confetti';
+
 
 export default function CreatePost({ session, signer, onPostCreated }) {
   const router = useRouter();
@@ -21,33 +24,15 @@ export default function CreatePost({ session, signer, onPostCreated }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [celebrate, setCelebrate] = useState(false);
+
+
   useEffect(() => {
     const fetchGithubCommit = async () => {
       try {
         setLoading(true);
-        console.log("Full session data:", session);
-        console.log("Session user data:", session?.user);
-        
-        const githubEmail = session?.user?.email;
-        const accessToken = session?.user?.accessToken;
-
-        console.log("Auth details:", {
-          hasEmail: !!githubEmail,
-          email: githubEmail,
-          hasToken: !!accessToken,
-          tokenPrefix: accessToken?.substring(0, 5) // Just show first 5 chars for security
-        });
-
-        if (!accessToken) {
-          throw new Error("No GitHub access token found in session");
-        }
-
-        const commitData = await getLatestCommit(githubEmail, accessToken);
-        console.log("Received commit data:", commitData);
-
-        if (!commitData.files || commitData.files.length === 0) {
-          throw new Error("No files found in commit data");
-        }
+        const githubEmail = session.user.email;
+        const commitData = await getLatestCommit('charlieedoherty@gmail.com');
 
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
@@ -99,10 +84,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      alert(`Current streak: ${streak.toString()} days`);
+      toast(`Current streak: ${streak.toString()} days`);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {
@@ -127,6 +114,11 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
   return (
     <div className="space-y-4">
+      <ConfettiComponent
+        width={window.innerWidth}
+        height={window.innerHeight}
+        isCelebrating={celebrate}
+      />
       <div className="flex flex-col gap-4">
         {error && (
           <p className="text-red-500 text-sm mt-2">{error}</p>
