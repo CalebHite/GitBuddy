@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import PostPreview from "./postPreview"
 import { uploadJsonToIPFS } from "../pinata"
@@ -9,6 +9,8 @@ import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { useRouter } from 'next/navigation';
+import ConfettiComponent from './confetti';
+
 
 export default function CreatePost({ session, signer, onPostCreated }) {
   const router = useRouter();
@@ -21,12 +23,15 @@ export default function CreatePost({ session, signer, onPostCreated }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [celebrate, setCelebrate] = useState(false);
+
+
   useEffect(() => {
     const fetchGithubCommit = async () => {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit("charlieedoherty@gmail.com");
+        const commitData = await getLatestCommit(githubEmail);
 
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
@@ -71,10 +76,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      // alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      setCelebrate(true);
+      setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      alert(`Current streak: ${streak.toString()} days`);
+      // alert(`Current streak: ${streak.toString()} days`);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {
@@ -99,6 +106,11 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
   return (
     <div className="space-y-4">
+      <ConfettiComponent
+        width={window.innerWidth}
+        height={window.innerHeight}
+        isCelebrating={celebrate}
+      />
       <div className="flex flex-col gap-4">
         {error && (
           <p className="text-red-500 text-sm mt-2">{error}</p>
