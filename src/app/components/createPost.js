@@ -32,7 +32,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit('charlieedoherty@gmail.com');
+        const commitData = await getLatestCommit(githubEmail);
 
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
@@ -78,11 +78,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       await tx.wait();
 
       toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      toast(`Current streak: ${streak.toString()} days`);
+      setTimeout(() => toast(`Current streak: ${streak.toString()} days`), 2000);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {
