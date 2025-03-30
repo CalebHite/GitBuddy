@@ -4,9 +4,17 @@ export default function PostPreview({ post }) {
   return (
     <Card>
       <CardHeader>
-        <img className="w-1/2" src={post.img}></img>
-        <CardTitle className="text-xl font-semibold mb-2">{post.userName}</CardTitle>
-        <h3 className="text-sm">{post.email}</h3>
+        <div className="flex items-center gap-4 mb-4">
+          <img 
+            className="w-12 h-12 rounded-full object-cover" 
+            src={post.img} 
+            alt={post.userName}
+          />
+          <div>
+            <CardTitle className="text-xl font-semibold">{post.userName}</CardTitle>
+            <h3 className="text-sm text-gray-600">{post.email}</h3>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <h1 className=""></h1>
