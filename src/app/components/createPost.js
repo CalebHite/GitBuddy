@@ -42,6 +42,18 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           const postPromises = response.data.map(pin => fetchFromIPFS(pin.ipfs_pin_hash));
           const posts = await Promise.all(postPromises);
           
+          setPost(currentPost => ({
+            ...currentPost,
+            githubCommit: {
+              repository: commitData.repository,
+              message: commitData.commitMessage,
+              date: commitData.commitDate,
+              url: commitData.commitUrl,
+              files: commitData.files,
+              summary: summary,
+            },
+          }));
+
           const isAlreadyPosted = posts.some(post => 
             post.success && 
             post.data?.githubCommit?.url === commitData.commitUrl
@@ -51,19 +63,19 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           if (isAlreadyPosted) {
             setError("This commit has already been posted!");
           }
+        } else {
+          setPost(currentPost => ({
+            ...currentPost,
+            githubCommit: {
+              repository: commitData.repository,
+              message: commitData.commitMessage,
+              date: commitData.commitDate,
+              url: commitData.commitUrl,
+              files: commitData.files,
+              summary: summary,
+            },
+          }));
         }
-
-        setPost(currentPost => ({
-          ...currentPost,
-          githubCommit: {
-            repository: commitData.repository,
-            message: commitData.commitMessage,
-            date: commitData.commitDate,
-            url: commitData.commitUrl,
-            files: commitData.files,
-            summary: summary,
-          },
-        }));
       } catch (error) {
         console.error("Error fetching GitHub commit:", error);
         setError("Failed to fetch commit data");
