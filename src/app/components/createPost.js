@@ -186,7 +186,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
                 onClick={handleSkipHours}
                 variant="outline"
                 size="sm"
-                className="whitespace-nowrap"
+                className="whitespace-nowrap cursor-pointer"
               >
                 Skip Hours
               </Button>
