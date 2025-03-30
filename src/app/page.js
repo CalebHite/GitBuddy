@@ -46,6 +46,10 @@ export default function Home() {
     }
   };
 
+  const handlePostCreated = () => {
+    setActiveTab('explore');
+  };
+
   if (!session) {
     return <LoginPage />;
   }
@@ -121,7 +125,11 @@ export default function Home() {
           {activeTab === 'profile' ? (
             <UserProfile user={session.user} isCurrentUser={true} signer={signer} />
           ) : activeTab === 'create' ? (
-            <CreatePost session={session} signer={signer} />
+            <CreatePost 
+              session={session} 
+              signer={signer} 
+              onPostCreated={handlePostCreated}
+            />
           ) : (
             <ExplorePage session={session} signer={signer} />
           )}
