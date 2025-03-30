@@ -4,7 +4,7 @@ import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinat
 import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
-import UserProfile from "./components/userProfile";
+import UserProfile from "./components/UserProfile";
 import { Button } from "@/components/ui/button";
 import { Plus, Globe, UserRound } from "lucide-react";
 import ExplorePage from "./components/explorePage";
