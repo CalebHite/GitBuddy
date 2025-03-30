@@ -2,94 +2,90 @@ import axios from 'axios';
 
 const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;  // Add your GitHub token here
 
-export async function getLatestCommit(email, accessToken) {
+export async function getLatestCommit(email) {
   try {
-    if (!accessToken) {
-      throw new Error("Access token is required");
-    }
-
-    const headers = {
-      Authorization: `Bearer ${accessToken}`,
-      'Accept': 'application/vnd.github.v3+json'
-    };
-
-    const userResponse = await axios.get('https://api.github.com/user', { headers });
-    const username = userResponse.data.login;
-
-    const searchResponse = await axios.get(
-      'https://api.github.com/search/commits', 
-      {
-        headers: {
-          ...headers,
-          'Accept': 'application/vnd.github.cloak-preview+json'
-        },
-        params: {
-          q: `author-email:${email}`,
-          sort: 'author-date',
-          order: 'desc',
-          per_page: 1
-        }
-      }
-    );
-
-    if (!searchResponse.data.items?.length) {
-      throw new Error('No recent commits found for this email');
-    }
-
-    const latestCommit = searchResponse.data.items[0];
-    const commitResponse = await axios.get(latestCommit.url, { headers });
-    const commitData = commitResponse.data;
-
-    return {
-      repository: latestCommit.repository.full_name,
-      commitMessage: commitData.commit.message,
-      commitDate: commitData.commit.author.date,
-      commitUrl: commitData.html_url,
-      files: commitData.files.map(file => ({
-        filename: file.filename,
-        status: file.status,
-        additions: file.additions,
-        deletions: file.deletions,
-        patch: file.patch
-      }))
-    };
-
-  } catch (error) {
-    throw new Error(`GitHub API Error: ${error.response?.data?.message || error.message}`);
-  }
-}
-
-export async function checkAndFollowUser(targetUsername) {
-  try {
+    // Set up headers with authentication
     const headers = {
       Authorization: `token ${GITHUB_TOKEN}`,
     };
 
-    // Get the list of users that the authenticated user is following
-    const followingResponse = await axios.get(`https://api.github.com/user/following`, {
+    // First, search for the user by email
+    const searchResponse = await axios.get('https://api.github.com/search/users', {
       headers,  // Include headers for authentication
+      params: { 
+        q: `${email} in:email`,
+        per_page: 1
+      }
     });
 
-    // Check if the authenticated user is already following the target user
-    const isFollowing = followingResponse.data.some(following => following.login === targetUsername);
-
-    if (isFollowing) {
-      console.log(`You are already following ${targetUsername}.`);
-      return;
+    // Check if any user was found
+    if (searchResponse.data.total_count === 0) {
+      throw new Error('No GitHub user found with this email address');
     }
 
-    // If not following, send a follow request
-    const followResponse = await axios.put(`https://api.github.com/user/following/${targetUsername}`, null, {
+    const username = searchResponse.data.items[0].login;
+
+    // Fetch all user's repositories (without sorting by 'updated')
+    const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`, {
       headers,  // Include headers for authentication
+      params: { per_page: 100 }  // Fetch up to 100 repos (increase if needed)
     });
+    const repos = reposResponse.data;
 
-    if (followResponse.status === 204) {
-      console.log(`Successfully followed ${targetUsername}.`);
-    } else {
-      console.error('Failed to send follow request.');
+    // If no repos exist, throw an error
+    if (repos.length === 0) {
+      throw new Error('No repositories found for this user');
     }
-    
+
+    let latestCommit = null;
+
+    // Loop through each repository and fetch the latest commit from each one
+    for (const repo of repos) {
+      const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${repo.name}/commits`, {
+        headers,  // Include headers for authentication
+        params: { per_page: 1 }
+      });
+      
+      const commits = commitsResponse.data;
+      
+      if (commits.length > 0) {
+        const commit = commits[0];
+        // Compare commits to find the most recent one
+        if (!latestCommit || new Date(commit.commit.author.date) > new Date(latestCommit.commitDate)) {
+          // Fetch detailed commit information
+          const commitDetailsResponse = await axios.get(commit.url, {
+            headers,  // Include headers for authentication
+          });
+          const commitDetails = commitDetailsResponse.data;
+
+          latestCommit = {
+            repository: repo.name,
+            commitSha: commit.sha,
+            commitMessage: commit.commit.message,
+            commitDate: commit.commit.author.date,
+            commitUrl: commit.html_url,
+            files: commitDetails.files.map(file => ({
+              filename: file.filename,
+              status: file.status,
+              additions: file.additions,
+              deletions: file.deletions,
+              changes: file.changes,
+              patch: file.patch
+            }))
+          };
+        }
+      }
+    }
+
+    // If no commits were found across repositories
+    if (!latestCommit) {
+      throw new Error('No commits found for this user');
+    }
+
+    return latestCommit;
+
   } catch (error) {
-    console.error('Error checking or following the user:', error);
+    console.error('Error fetching latest commit:', error);
+    throw error;
   }
 }
