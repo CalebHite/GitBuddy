@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import PostPreview from "./postPreview"
-import { uploadJsonToIPFS } from "../pinata"
+import { uploadJsonToIPFS, fetchAllFromIPFS, fetchFromIPFS } from "../pinata"
 import { getLatestCommit } from "../github"
 import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
@@ -27,6 +27,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
   const [celebrate, setCelebrate] = useState(false);
   const [skipHours, setSkipHours] = useState(0);
+  const [isCommitPosted, setIsCommitPosted] = useState(false);
 
   useEffect(() => {
     const fetchGithubCommit = async () => {
@@ -34,9 +35,24 @@ export default function CreatePost({ session, signer, onPostCreated }) {
         setLoading(true);
         const githubEmail = session.user.email;
         const commitData = await getLatestCommit(githubEmail);
-
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
+        const response = await fetchAllFromIPFS();
+        if (response.success && Array.isArray(response.data)) {
+          const postPromises = response.data.map(pin => fetchFromIPFS(pin.ipfs_pin_hash));
+          const posts = await Promise.all(postPromises);
+          
+          const isAlreadyPosted = posts.some(post => 
+            post.success && 
+            post.data?.githubCommit?.url === commitData.commitUrl
+          );
+
+          setIsCommitPosted(isAlreadyPosted);
+          if (isAlreadyPosted) {
+            setError("This commit has already been posted!");
+          }
+        }
+
         setPost(currentPost => ({
           ...currentPost,
           githubCommit: {
@@ -171,9 +187,9 @@ export default function CreatePost({ session, signer, onPostCreated }) {
         <Button
           onClick={handleCreatePost}
           className="bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
-          disabled={loading}
+          disabled={loading || isCommitPosted}
         >
-          {loading ? 'Creating Post...' : 'Create Post'}
+          {loading ? 'Creating Post...' : isCommitPosted ? 'Already Posted' : 'Create Post'}
         </Button>
       </div>
     </div>

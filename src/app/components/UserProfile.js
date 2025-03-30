@@ -214,7 +214,12 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           <div className="space-y-4">
             {userPosts.map((post, index) => (
               <div key={post.ipfsHash} className="border rounded p-4 bg-white">
-                <h4 className="font-medium">{post.githubCommit?.repository}</h4>
+                <div className="flex justify-between items-start">
+                  <h4 className="font-medium">{post.githubCommit?.repository}</h4>
+                  <p className="text-gray-400 text-xs">
+                    Committed: {new Date(post.githubCommit?.date).toLocaleString()}
+                  </p>
+                </div>
                 <p className="text-gray-600 mt-2">{post.githubCommit?.message}</p>
                 {post.githubCommit?.files && post.githubCommit.files.length > 0 && (
                   <div className="mt-4 bg-gray-50 p-4 rounded-lg">
