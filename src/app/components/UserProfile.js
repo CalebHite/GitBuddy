@@ -6,6 +6,7 @@ import { ethers } from 'ethers';
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { UserPlus, MessageCirclePlus } from "lucide-react";
 import TextingComponent from './TextingComponent';
+import { signOut } from "next-auth/react";
 
 const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -196,7 +197,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
       {isCurrentUser && (
         <button
           onClick={() => signOut()}
-          className="mb-3 mt-3 px-4 py-2 border text-black rounded cursor-pointer hover:bg-red-200"
+          className="mb-3 mt-3 px-4 py-2 border text-black rounded cursor-pointer hover:bg-gray-200"
         >
           Sign Out
         </button>
