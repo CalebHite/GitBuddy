@@ -4,7 +4,7 @@ export default function PostPreview({ post }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-4">
           <img 
             className="w-12 h-12 rounded-full object-cover" 
             src={post.img} 
@@ -17,7 +17,7 @@ export default function PostPreview({ post }) {
         </div>
       </CardHeader>
       <CardContent>
-        <h1 className=""></h1>
+      <hr className="my-4 border-gray-200" />
         {post.githubCommit && (
           <div className="mt-4 text-sm text-gray-600">
             <p>{post.githubCommit.repository}</p>
