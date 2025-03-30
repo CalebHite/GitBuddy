@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import PostPreview from "./postPreview"
 import { uploadJsonToIPFS } from "../pinata"
 import { getLatestCommit } from "../github"
+import { createCommitSummarizer } from '../gemini';
+
+const summarizeCommits = createCommitSummarizer();
 
 export default function CreatePost({ session }) {
   const [post, setPost] = useState({
@@ -18,23 +21,26 @@ export default function CreatePost({ session }) {
     const fetchGithubCommit = async () => {
       try {
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit("charlieedoherty@gmail.com");
-        
-        setPost(currentPost => ({
+        const commitData = await getLatestCommit('charlieedoherty@gmail.com'); // Await the commit data
+  
+        const summary = "";
+
+        setPost((currentPost) => ({
           ...currentPost,
           githubCommit: {
             repository: commitData.repository,
             message: commitData.commitMessage,
             date: commitData.commitDate,
             url: commitData.commitUrl,
-            files: commitData.files
-          }
+            files: commitData.files,
+            summary: summary,
+          },
         }));
       } catch (error) {
         console.error("Error fetching GitHub commit:", error);
       }
     };
-
+  
     if (session?.user?.email) {
       fetchGithubCommit();
     }
