@@ -25,8 +25,29 @@ export default function CreatePost({ session, signer, onPostCreated }) {
     const fetchGithubCommit = async () => {
       try {
         setLoading(true);
-        const githubEmail = session.user.email;
-        const commitData = await getLatestCommit("charlieedoherty@gmail.com");
+        console.log("Full session data:", session);
+        console.log("Session user data:", session?.user);
+        
+        const githubEmail = session?.user?.email;
+        const accessToken = session?.user?.accessToken;
+
+        console.log("Auth details:", {
+          hasEmail: !!githubEmail,
+          email: githubEmail,
+          hasToken: !!accessToken,
+          tokenPrefix: accessToken?.substring(0, 5) // Just show first 5 chars for security
+        });
+
+        if (!accessToken) {
+          throw new Error("No GitHub access token found in session");
+        }
+
+        const commitData = await getLatestCommit(githubEmail, accessToken);
+        console.log("Received commit data:", commitData);
+
+        if (!commitData.files || commitData.files.length === 0) {
+          throw new Error("No files found in commit data");
+        }
 
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
@@ -42,8 +63,15 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           },
         }));
       } catch (error) {
-        console.error("Error fetching GitHub commit:", error);
-        setError("Failed to fetch commit data");
+        console.error("Detailed error in fetchGithubCommit:", {
+          message: error.message,
+          stack: error.stack,
+          sessionData: {
+            hasEmail: !!session?.user?.email,
+            hasAccessToken: !!session?.user?.accessToken
+          }
+        });
+        setError(`Failed to fetch commit data: ${error.message}`);
       } finally {
         setLoading(false);
       }
