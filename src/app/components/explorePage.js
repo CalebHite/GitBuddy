@@ -121,15 +121,26 @@ export default function ExplorePage({ session }) {
     <div className="max-w-2xl mx-auto py-8 px-8 border rounded-lg bg-gray-50">
       <h1 className="text-3xl font-bold mb-8 text-center">Explore</h1>
       {decodedPosts.length > 0 ? (
-        <div className="relative">
-          <button
-            onClick={handlePreviousPost}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-blue-500 w-10 h-10 rounded-full shadow-lg hover:bg-blue-600 text-white z-20 cursor-pointer flex items-center justify-center text-xl"
-          >
-            ←
-          </button>
+        <div className="relative h-96">
+          {/* Fixed-position navigation buttons */}
+          <div className="absolute inset-0 flex items-center justify-between pointer-events-none z-20">
+            <button
+              onClick={handlePreviousPost}
+              className="pointer-events-auto bg-blue-500 w-10 h-10 rounded-full shadow-lg hover:bg-blue-600 text-white cursor-pointer flex items-center justify-center text-xl ml-1"
+            >
+              ←
+            </button>
+            
+            <button
+              onClick={handleNextPost}
+              className="pointer-events-auto bg-blue-500 w-10 h-10 rounded-full shadow-lg hover:bg-blue-600 text-white cursor-pointer flex items-center justify-center text-xl mr-1"
+            >
+              →
+            </button>
+          </div>
           
-          <div className="mx-12">
+          {/* Fixed-height content container */}
+          <div className="mx-12 h-full overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentPostIndex}
@@ -151,6 +162,7 @@ export default function ExplorePage({ session }) {
                   damping: 30,
                   duration: 0.3
                 }}
+                className="h-full overflow-y-auto"
               >
                 <ViewPost 
                   post={decodedPosts[currentPostIndex]} 
@@ -161,13 +173,6 @@ export default function ExplorePage({ session }) {
               </motion.div>
             </AnimatePresence>
           </div>
-
-          <button
-            onClick={handleNextPost}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-blue-500 w-10 h-10 rounded-full shadow-lg hover:bg-blue-600 text-white z-20 cursor-pointer flex items-center justify-center text-xl"
-          >
-            →
-          </button>
         </div>
       ) : (
         <div className="text-center text-gray-500">No posts found</div>
