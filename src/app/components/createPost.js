@@ -9,6 +9,7 @@ import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner"
 import ConfettiComponent from './confetti';
 
 
@@ -31,7 +32,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit(githubEmail);
+        const commitData = await getLatestCommit('charlieedoherty@gmail.com');
 
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
@@ -76,12 +77,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      // alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      // alert(`Current streak: ${streak.toString()} days`);
+      toast(`Current streak: ${streak.toString()} days`);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {
