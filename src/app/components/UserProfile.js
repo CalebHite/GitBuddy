@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ethers } from 'ethers';
+import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 
 const UserProfile = ({ user, isCurrentUser = false }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -35,104 +36,11 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
     try {
       const signer = provider.getSigner();
 
-      const contractAddress = "0x7410b151dd9aee17b2fa3b24d5ed7dd560632b03";
-      const abi = [
-        {
-          "inputs": [],
-          "name": "post",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "stateMutability": "nonpayable",
-          "type": "constructor"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "user",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "streakCount",
-              "type": "uint256"
-            }
-          ],
-          "name": "PostLogged",
-          "type": "event"
-        },
-        {
-          "inputs": [],
-          "name": "currentTime",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "getStreak",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "owner",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "name": "users",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "lastValidPostTime",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "streakCount",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        }
-      ];
-      const contract = new ethers.Contract(contractAddress, abi, signer);
+      const contract = new ethers.Contract(
+        STREAK_CONTRACT_ADDRESS, 
+        STREAK_CONTRACT_ABI, 
+        signer
+      );
 
       // Get user's streak from the contract
       const userAddress = await signer.getAddress();

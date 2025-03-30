@@ -4,12 +4,17 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export function createCommitSummarizer() {
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-  console.log(apiKey);
+  
+  // Add validation for API key
+  if (!apiKey) {
+    throw new Error('Gemini API key is not configured. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env.local file');
+  }
+
   const modelName = "gemini-pro";
   const maxOutputTokens = 256;
   
   // Initialize the Google Generative AI with the provided API key
-  const genAI = new GoogleGenerativeAI({apiKey: apiKey});
+  const genAI = new GoogleGenerativeAI(apiKey);
   
   // Get the model
   const model = genAI.getGenerativeModel({ 
