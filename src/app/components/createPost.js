@@ -91,6 +91,11 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
   const handleCreatePost = async () => {
     try {
+      if (isCommitPosted) {
+        toast.error("This commit has already been posted!");
+        return;
+      }
+
       setLoading(true);
       const postData = {
         ...post,
@@ -102,6 +107,9 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
       const ipfsResponse = await uploadJsonToIPFS(postData);
       if (!ipfsResponse.success) {
+        if (ipfsResponse.message?.includes('409') || ipfsResponse.status === 409) {
+          throw new Error('This content has already been posted to IPFS');
+        }
         throw new Error(ipfsResponse.message);
       }
 
@@ -114,7 +122,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      toast.success(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
@@ -127,7 +135,11 @@ export default function CreatePost({ session, signer, onPostCreated }) {
 
     } catch (error) {
       console.error("Error creating post:", error);
-      setError(error.message);
+      const errorMessage = error.response?.status === 409 
+        ? "This content has already been posted to IPFS"
+        : error.message || "Failed to create post";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

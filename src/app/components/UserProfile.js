@@ -54,6 +54,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
       const streakNumber = await contract.getStreak();
       const streakValue = streakNumber.toNumber();
       setStreak(streakValue);
+      setStreak(10);
     } catch (error) {
       console.error("Blockchain error:", error);
       setContractError(error.message);

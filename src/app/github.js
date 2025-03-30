@@ -41,39 +41,51 @@ export async function getLatestCommit(email) {
 
     // Loop through each repository and fetch the latest commit from each one
     for (const repo of repos) {
-      const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${repo.name}/commits`, {
-        headers,  // Include headers for authentication
-        params: { per_page: 1 }
-      });
-      
-      const commits = commitsResponse.data;
-      
-      if (commits.length > 0) {
-        const commit = commits[0];
-        // Compare commits to find the most recent one
-        if (!latestCommit || new Date(commit.commit.author.date) > new Date(latestCommit.commitDate)) {
-          // Fetch detailed commit information
-          const commitDetailsResponse = await axios.get(commit.url, {
-            headers,  // Include headers for authentication
-          });
-          const commitDetails = commitDetailsResponse.data;
+      try {
+        const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${repo.name}/commits`, {
+          headers,
+          params: { per_page: 1 }
+        });
+        
+        const commits = commitsResponse.data;
+        
+        if (commits.length > 0) {
+          const commit = commits[0];
+          
+          // Only update latestCommit if this commit is more recent
+          if (!latestCommit || new Date(commit.commit.author.date) > new Date(latestCommit.commitDate)) {
+            try {
+              const commitDetailsResponse = await axios.get(commit.url, {
+                headers,
+              });
+              const commitDetails = commitDetailsResponse.data;
 
-          latestCommit = {
-            repository: repo.name,
-            commitSha: commit.sha,
-            commitMessage: commit.commit.message,
-            commitDate: commit.commit.author.date,
-            commitUrl: commit.html_url,
-            files: commitDetails.files.map(file => ({
-              filename: file.filename,
-              status: file.status,
-              additions: file.additions,
-              deletions: file.deletions,
-              changes: file.changes,
-              patch: file.patch
-            }))
-          };
+              latestCommit = {
+                repository: repo.name,
+                commitSha: commit.sha,
+                commitMessage: commit.commit.message,
+                commitDate: commit.commit.author.date,
+                commitUrl: commit.html_url,
+                files: commitDetails.files.map(file => ({
+                  filename: file.filename,
+                  status: file.status,
+                  additions: file.additions,
+                  deletions: file.deletions,
+                  changes: file.changes,
+                  patch: file.patch || '' // Handle cases where patch might be undefined
+                }))
+              };
+            } catch (detailsError) {
+              console.error(`Error fetching commit details for ${repo.name}:`, detailsError);
+              // Continue to next repo if we can't get details for this one
+              continue;
+            }
+          }
         }
+      } catch (repoError) {
+        console.error(`Error fetching commits for ${repo.name}:`, repoError);
+        // Continue to next repo if this one fails
+        continue;
       }
     }
 
@@ -82,10 +94,24 @@ export async function getLatestCommit(email) {
       throw new Error('No commits found for this user');
     }
 
+    // Ensure there's at least one file in the commit
+    if (!latestCommit.files || latestCommit.files.length === 0) {
+      throw new Error('No files found in the latest commit');
+    }
+
     return latestCommit;
 
   } catch (error) {
-    console.error('Error fetching latest commit:', error);
-    throw error;
+    // Handle specific error cases
+    if (error.response?.status === 409) {
+      throw new Error('Conflict while fetching GitHub data. Please try again.');
+    } else if (error.response?.status === 403) {
+      throw new Error('GitHub API rate limit exceeded. Please try again later.');
+    } else if (error.response?.status === 404) {
+      throw new Error('GitHub repository or user not found.');
+    }
+    
+    // Throw the original error with more context
+    throw new Error(`Failed to fetch GitHub commit: ${error.message}`);
   }
 }
