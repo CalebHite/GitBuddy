@@ -19,7 +19,7 @@ export default function Home() {
 
   useEffect(() => {
     const connectWallet = async () => {
-      if (!session) return; // Only connect if user is logged in
+      if (!session) return;
       
       try {
         if (!window.ethereum) {
@@ -31,13 +31,12 @@ export default function Home() {
         const walletSigner = provider.getSigner();
         setSigner(walletSigner);
       } catch (error) {
-        console.error("Error connecting wallet:", error);
         setWalletError(error.message);
       }
     };
 
     connectWallet();
-  }, [session]); // Reconnect when session changes
+  }, [session]);
 
   useEffect(() => {
     if (session) {

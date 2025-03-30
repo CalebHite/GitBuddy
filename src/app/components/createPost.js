@@ -32,8 +32,14 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit(githubEmail);
 
+        const accessToken = session?.user?.accessToken;
+
+        if (!accessToken) {
+          throw new Error("No GitHub access token found in session");
+        }
+
+        const commitData = await getLatestCommit(githubEmail, accessToken);
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
         setPost(currentPost => ({
@@ -48,20 +54,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           },
         }));
       } catch (error) {
-        console.error("Detailed error in fetchGithubCommit:", {
-          message: error.message,
-          stack: error.stack,
-          sessionData: {
-            hasEmail: !!session?.user?.email,
-            hasAccessToken: !!session?.user?.accessToken
-          }
-        });
         setError(`Failed to fetch commit data: ${error.message}`);
       } finally {
         setLoading(false);
       }
     };
-  
+
     if (session?.user?.email) {
       fetchGithubCommit();
     }
