@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import PostPreview from "./postPreview";
-import { fetchAllFromIPFS, fetchFromIPFSById } from "../pinata";
+import { fetchAllFromIPFS, fetchFromIPFS } from "../pinata";
 import ViewPost from "./ViewPost";
 import UserProfile from "./UserProfile";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,29 +15,36 @@ export default function ExplorePage({ session }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPostIndex, setCurrentPostIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState('right');
+  const [userStreak, setUserStreak] = useState(0);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
         const response = await fetchAllFromIPFS();
-        console.log(response);
-        if (response.success) {
+        console.log("IPFS Response:", response);
+
+        if (response.success && Array.isArray(response.data)) {
+          // Now response.data should be the array of pins
           setPosts(response.data);
-          // Fetch actual content for each pin
+
+          // Fetch content for each pin
           const postPromises = response.data.map(async (pin) => {
             try {
-              const contentResponse = await fetchFromIPFSById(pin.id);
-              if (contentResponse.success) {
+              console.log("Processing pin:", pin);
+              const contentResponse = await fetchFromIPFS(pin.ipfs_pin_hash);
+              console.log("Content response for pin:", contentResponse);
+
+              if (contentResponse.success && contentResponse.data) {
                 return {
                   ...contentResponse.data,
-                  pinData: pin,
+                  ipfsHash: pin.ipfs_pin_hash,
                   date: pin.date_pinned
                 };
               }
               return null;
             } catch (error) {
-              console.error(`Failed to fetch content for pin ${pin.id}:`, error);
+              console.error(`Failed to fetch content for pin ${pin.ipfs_pin_hash}:`, error);
               return null;
             }
           });
@@ -45,10 +52,11 @@ export default function ExplorePage({ session }) {
           const resolvedPosts = (await Promise.all(postPromises))
             .filter(post => post !== null)
             .sort((a, b) => new Date(b.date) - new Date(a.date));
-          
+
+          console.log("Resolved posts:", resolvedPosts);
           setDecodedPosts(resolvedPosts);
         } else {
-          throw new Error(response.message);
+          throw new Error(response.message || "Failed to fetch posts from IPFS");
         }
       } catch (error) {
         console.error("Failed to fetch posts:", error);
@@ -116,6 +124,11 @@ export default function ExplorePage({ session }) {
     );
   }
 
+  // Debug information about posts
+  console.log("Current decoded posts:", decodedPosts);
+  console.log("Current post index:", currentPostIndex);
+  console.log("Current post:", decodedPosts[currentPostIndex]);
+
   return (
     <div className="max-w-2xl mx-auto py-8 px-8 border rounded-lg bg-gray-50">
       <h1 className="text-3xl font-bold mb-8 text-center">Explore</h1>
@@ -128,33 +141,34 @@ export default function ExplorePage({ session }) {
             ←
           </button>
           
-          <div className="mx-20 overflow-hidden relative">
-            <AnimatePresence initial={false}>
+          <div className="mx-12">
+            <AnimatePresence mode="wait">
               <motion.div
                 key={currentPostIndex}
                 initial={{ 
-                  x: slideDirection === 'right' ? '100%' : '-100%',
-                  position: 'absolute',
-                  width: '100%',
+                  opacity: 0,
+                  x: slideDirection === 'right' ? 100 : -100,
                 }}
                 animate={{ 
+                  opacity: 1,
                   x: 0,
-                  position: 'relative'
                 }}
                 exit={{ 
-                  x: slideDirection === 'right' ? '-100%' : '100%',
-                  position: 'absolute',
-                  width: '100%',
+                  opacity: 0,
+                  x: slideDirection === 'right' ? -100 : 100,
                 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 30,
+                  duration: 0.3
+                }}
               >
                 <ViewPost 
                   post={decodedPosts[currentPostIndex]} 
-                  onAvatarClick={() => handleAvatarClick({
-                    name: decodedPosts[currentPostIndex].userName,
-                    email: decodedPosts[currentPostIndex].email,
-                    image: decodedPosts[currentPostIndex].img || '/default-avatar.png'
-                  })}
+                  onAvatarClick={handleAvatarClick}
+                  isPersonal={decodedPosts[currentPostIndex].email === session?.user?.email}
+                  streak={decodedPosts[currentPostIndex].email === session?.user?.email ? userStreak : 0}
                 />
               </motion.div>
             </AnimatePresence>
@@ -166,10 +180,26 @@ export default function ExplorePage({ session }) {
           >
             →
           </button>
+
+          <div className="text-center mt-4 text-gray-500">
+            {currentPostIndex + 1} of {decodedPosts.length}
+          </div>
         </div>
       ) : (
         <div className="text-center text-gray-500">No posts found</div>
       )}
+
+      {/* Debug section */}
+      <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
+        <p>Raw posts length: {posts.length}</p>
+        <p>Decoded posts length: {decodedPosts.length}</p>
+        <p>Current index: {currentPostIndex}</p>
+        {decodedPosts[currentPostIndex] && (
+          <pre className="mt-2 overflow-x-auto">
+            {JSON.stringify(decodedPosts[currentPostIndex], null, 2)}
+          </pre>
+        )}
+      </div>
     </div>
   );
 }
