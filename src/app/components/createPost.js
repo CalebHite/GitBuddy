@@ -94,7 +94,7 @@ export default function CreatePost({ session, signer }) {
         {/* Create Post Button */}
         <Button
           onClick={handleCreatePost}
-          className="bg-blue-500 text-white hover:bg-blue-600"
+          className="bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
         >
           Create Post
         </Button>

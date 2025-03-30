@@ -180,26 +180,10 @@ export default function ExplorePage({ session }) {
           >
             →
           </button>
-
-          <div className="text-center mt-4 text-gray-500">
-            {currentPostIndex + 1} of {decodedPosts.length}
-          </div>
         </div>
       ) : (
         <div className="text-center text-gray-500">No posts found</div>
       )}
-
-      {/* Debug section */}
-      <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
-        <p>Raw posts length: {posts.length}</p>
-        <p>Decoded posts length: {decodedPosts.length}</p>
-        <p>Current index: {currentPostIndex}</p>
-        {decodedPosts[currentPostIndex] && (
-          <pre className="mt-2 overflow-x-auto">
-            {JSON.stringify(decodedPosts[currentPostIndex], null, 2)}
-          </pre>
-        )}
-      </div>
     </div>
   );
 }
