@@ -4,7 +4,8 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { checkAndFollowUser } from '../github';
 import { ethers } from 'ethers';
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
-import { UserPlus } from "lucide-react";
+import { UserPlus, MessageCirclePlus } from "lucide-react";
+import TextingComponent from './TextingComponent';
 
 const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   const [userPosts, setUserPosts] = useState([]);
@@ -12,6 +13,11 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   const [streak, setStreak] = useState(0);
   const [contractError, setContractError] = useState(null);
   const [walletAddress, setWalletAddress] = useState('');
+  const [showTextingComponent, setShowTextingComponent] = useState(false);
+
+  const toggleTextingComponent = () => {
+    setShowTextingComponent(prev => !prev);
+  };
 
   const profileTitle = isCurrentUser ? 'My Profile' : `${user?.name}'s Profile`;
 
@@ -144,6 +150,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           <p className="text-gray-600">{user?.email}</p>
         </div>
         {isCurrentUser || <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>      }
+        {isCurrentUser || <button onClick={toggleTextingComponent}><MessageCirclePlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>}
       </div>
   
       {/* Wallet Connection Section */}
@@ -176,6 +183,12 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {showTextingComponent && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <TextingComponent userId={walletAddress} otherUserId={user?.githubUsername} />
         </div>
       )}
   
