@@ -42,12 +42,11 @@ export default async function Home() {
   };
 
   const handleFetch = async () => {
-    console.log('hi')
     if (!ipfsId) {
       alert("Please upload data first!");
       return;
     }
-    
+
     try {
       setLoading(true);
       const response = await fetchFromIPFSById(ipfsId);
@@ -89,7 +88,7 @@ export default async function Home() {
   };
 
   return (
-    <div className="min-h-screen p-8">      
+    <div className="min-h-screen p-8">
       <div className="space-y-4">
         {session ? (
           <div className="flex-col items-center gap-4">
