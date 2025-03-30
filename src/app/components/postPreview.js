@@ -28,7 +28,12 @@ export default function PostPreview({ post }) {
         <hr className="my-4 border-gray-200" />
         {post.githubCommit && (
           <div className="mt-4 text-sm text-gray-600">
-            <p>{post.githubCommit.repository}</p>
+            <div className="flex justify-between items-start mb-2">
+              <p>{post.githubCommit.repository}</p>
+              <p className="text-gray-400 text-xs">
+                Committed: {new Date(post.githubCommit.date).toLocaleString()}
+              </p>
+            </div>
             <p className="font-semibold text-xl">{post.githubCommit.message}</p>
             {post.githubCommit.files && post.githubCommit.files.length > 0 && (
               <>
