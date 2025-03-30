@@ -58,7 +58,7 @@ export default function CreatePost({ session }) {
   return (
     <div className="w-1/2 space-y-6 center-items">
     {post && <PostPreview post={post} />}
-    <Button variant="outline" className="hover:bg-gray-100 cursor-pointer" onClick={handleCreatePost}>Create Post</Button>
+    <Button variant="outline" className="hover:bg-gray-100 cursor-pointer bg-blue-500 text-white hover:bg-blue-600 hover:text-white" onClick={handleCreatePost}>Create Post</Button>
     </div>
   )
 }

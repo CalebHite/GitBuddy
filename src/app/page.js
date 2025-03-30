@@ -4,6 +4,8 @@ import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinat
 import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
+import { Button } from "@/components/ui/button";
+import { Plus, Minus } from "lucide-react";
 
 // Define UserProfile component that was missing
 const UserProfile = ({ user }) => {
@@ -34,6 +36,7 @@ export default function Home() {
   const [ipfsId, setIpfsId] = useState("");
   const [fetchedData, setFetchedData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   // Example JSON data to upload
   const exampleData = {
@@ -111,56 +114,21 @@ export default function Home() {
       <div className="space-y-4">
         {session ? (
           <div className="flex flex-col items-center gap-4">
-            <CreatePost session={session} />
             <UserProfile user={session?.user} />
+            <Button
+              onClick={() => setShowCreatePost(!showCreatePost)}
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-blue-500 text-white hover:bg-blue-600 hover:text-white cursor-pointer"
+            >
+              {showCreatePost ? (
+                <Minus className="h-4 w-4" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
+            </Button>
             
-            {/* Added the IPFS testing UI */}
-            <div className="mt-8 p-4 border rounded-lg w-full max-w-md mx-auto">
-              <h2 className="text-xl font-bold mb-4">IPFS Testing</h2>
-              <div className="space-y-4">
-                <button
-                  onClick={handleUpload}
-                  disabled={loading}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded cursor-pointer disabled:bg-blue-300"
-                >
-                  {loading ? "Processing..." : "Upload Test Data"}
-                </button>
-                
-                <button
-                  onClick={handleFetch}
-                  disabled={loading || !ipfsId}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded cursor-pointer disabled:bg-green-300"
-                >
-                  Fetch Data
-                </button>
-                
-                <button
-                  onClick={handleDelete}
-                  disabled={loading || !ipfsId}
-                  className="w-full px-4 py-2 bg-red-600 text-white rounded cursor-pointer disabled:bg-red-300"
-                >
-                  Delete Data
-                </button>
-                
-                {ipfsId && (
-                  <div className="mt-2">
-                    <p className="font-semibold">Current IPFS ID:</p>
-                    <code className="block p-2 bg-gray-100 rounded overflow-x-auto">
-                      {ipfsId}
-                    </code>
-                  </div>
-                )}
-                
-                {fetchedData && (
-                  <div className="mt-2">
-                    <p className="font-semibold">Fetched Data:</p>
-                    <pre className="p-2 bg-gray-100 rounded overflow-x-auto">
-                      {JSON.stringify(fetchedData, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
+            {showCreatePost && <CreatePost session={session} />}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4 text-center min-h-screen justify-center overflow-hidden">
