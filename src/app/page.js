@@ -6,6 +6,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
+import ExplorePage from "./components/explorePage";
 
 // Define UserProfile component that was missing
 const UserProfile = ({ user }) => {
@@ -129,6 +130,8 @@ export default function Home() {
             </Button>
             
             {showCreatePost && <CreatePost session={session} />}
+            
+            <ExplorePage />
           </div>
         ) : (
           <button
