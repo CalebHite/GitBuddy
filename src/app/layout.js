@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Boilerplate Code",
-  description: "",
+  title: "GitBuddy",
+  description: "Built for the Midwest Blockathon",
 };
 
 export default async function RootLayout({ children }) {

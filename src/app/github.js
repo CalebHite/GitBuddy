@@ -89,3 +89,38 @@ export async function getLatestCommit(email) {
     throw error;
   }
 }
+
+export async function checkAndFollowUser(targetUsername) {
+  try {
+    const headers = {
+      Authorization: `token ${GITHUB_TOKEN}`,
+    };
+
+    // Get the list of users that the authenticated user is following
+    const followingResponse = await axios.get(`https://api.github.com/user/following`, {
+      headers,  // Include headers for authentication
+    });
+
+    // Check if the authenticated user is already following the target user
+    const isFollowing = followingResponse.data.some(following => following.login === targetUsername);
+
+    if (isFollowing) {
+      console.log(`You are already following ${targetUsername}.`);
+      return;
+    }
+
+    // If not following, send a follow request
+    const followResponse = await axios.put(`https://api.github.com/user/following/${targetUsername}`, null, {
+      headers,  // Include headers for authentication
+    });
+
+    if (followResponse.status === 204) {
+      console.log(`Successfully followed ${targetUsername}.`);
+    } else {
+      console.error('Failed to send follow request.');
+    }
+    
+  } catch (error) {
+    console.error('Error checking or following the user:', error);
+  }
+}
