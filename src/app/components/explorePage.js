@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import PostPreview from "./postPreview";
 import { fetchAllFromIPFS, fetchFromIPFSById } from "../pinata";
+import ViewPost from "./ViewPost";
 
 export default function ExplorePage() {
   const [posts, setPosts] = useState([]);
@@ -76,8 +77,8 @@ export default function ExplorePage() {
       <h1 className="text-3xl font-bold mb-8 text-center">Explore</h1>
       <div className="space-y-6">
         {decodedPosts.map((post, index) => (
-          <div key={post.pinData.id} className="shadow-lg rounded-lg overflow-hidden">
-            <PostPreview post={post} />
+          <div key={post.pinData.id}>
+            <ViewPost post={post} />
           </div>
         ))}
         {decodedPosts.length === 0 && (
