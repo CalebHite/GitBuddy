@@ -110,7 +110,7 @@ export default function Home() {
                 size="icon"
                 className={`rounded-full ${
                   activeTab === 'profile' 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-blue-600 text-white hover:bg-blue-600 hover:text-white' 
                     : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
                 } cursor-pointer`}
               >
@@ -127,7 +127,7 @@ export default function Home() {
                 size="icon"
                 className={`rounded-full ${
                   activeTab === 'explore' 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-blue-600 text-white hover:bg-blue-600 hover:text-white' 
                     : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
                 } cursor-pointer`}
               >
@@ -143,7 +143,7 @@ export default function Home() {
                 size="icon"
                 className={`rounded-full ${
                   activeTab === 'create' 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-blue-600 text-white hover:bg-blue-600 hover:text-white' 
                     : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
                 } cursor-pointer`}
               >
@@ -158,7 +158,7 @@ export default function Home() {
             {/* Tab content */}
             {activeTab === 'profile' && <UserProfile user={session?.user} />}
             {activeTab === 'create' && <CreatePost session={session} />}
-            {activeTab === 'explore' && <ExplorePage />}
+            {activeTab === 'explore' && <ExplorePage session={session} />}
           </div>
         ) : (
           <LoginPage />

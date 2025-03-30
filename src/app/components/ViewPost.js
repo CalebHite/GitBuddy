@@ -1,19 +1,28 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function ViewPost({ post }) {
+export default function ViewPost({ post, onAvatarClick }) {
+  // Construct user object from post data
+  const userInfo = {
+    name: post.userName,
+    email: post.email,
+    image: post.img || '/default-avatar.png'
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-4">
           <img 
-            className="w-12 h-12 rounded-full object-cover" 
-            src={post.img || '/default-avatar.png'} // Add a fallback image
-            alt={post.author}
+            className="w-12 h-12 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+            src={userInfo.image}
+            alt={userInfo.name}
+            onClick={() => onAvatarClick(userInfo)}
+            title="Click to view profile"
           />
           <div>
-            <CardTitle className="text-xl font-semibold">{post.userName}</CardTitle>
-            <h3 className="text-sm text-gray-600">{post.email}</h3>
+            <CardTitle className="text-xl font-semibold">{userInfo.name}</CardTitle>
+            <h3 className="text-sm text-gray-600">{userInfo.email}</h3>
           </div>
         </div>
       </CardHeader>

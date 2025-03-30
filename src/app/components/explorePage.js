@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import PostPreview from "./postPreview";
 import { fetchAllFromIPFS, fetchFromIPFSById } from "../pinata";
 import ViewPost from "./ViewPost";
+import UserProfile from "./UserProfile";
 
-export default function ExplorePage() {
+export default function ExplorePage({ session }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [decodedPosts, setDecodedPosts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -56,6 +58,16 @@ export default function ExplorePage() {
     fetchPosts();
   }, []);
 
+  // Add handler for avatar clicks
+  const handleAvatarClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  // Add handler to return to explore view
+  const handleBackToExplore = () => {
+    setSelectedUser(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,13 +84,38 @@ export default function ExplorePage() {
     );
   }
 
+  // Show UserProfile if a user is selected
+  if (selectedUser) {
+    return (
+      <div className="max-w-2xl mx-auto py-8 px-4">
+        <button
+          onClick={handleBackToExplore}
+          className="mb-4 px-4 py-2 text-blue-500 hover:text-blue-700 cursor-pointer"
+        >
+          ← Back to Explore
+        </button>
+        <UserProfile 
+          user={selectedUser} 
+          isCurrentUser={session?.user?.email === selectedUser.email}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8 text-center">Explore</h1>
       <div className="space-y-6">
         {decodedPosts.map((post, index) => (
           <div key={post.pinData.id}>
-            <ViewPost post={post} />
+            <ViewPost 
+              post={post} 
+              onAvatarClick={() => handleAvatarClick({
+                name: post.userName,
+                email: post.email,
+                image: post.img || '/default-avatar.png'
+              })}
+            />
           </div>
         ))}
         {decodedPosts.length === 0 && (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
 
-const UserProfile = ({ user }) => {
+const UserProfile = ({ user, isCurrentUser = false }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,17 +56,21 @@ const UserProfile = ({ user }) => {
         </div>
       </div>
 
-      {/* Sign Out Button */}
-      <button
-        onClick={() => signOut()}
-        className="mb-6 px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700"
-      >
-        Sign Out
-      </button>
+      {/* Only show Sign Out button if it's the current user's profile */}
+      {isCurrentUser && (
+        <button
+          onClick={() => signOut()}
+          className="mb-6 px-4 py-2 bg-red-600 text-white rounded cursor-pointer hover:bg-red-700"
+        >
+          Sign Out
+        </button>
+      )}
 
       {/* Posts Section */}
       <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-4">Your Posts</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          {isCurrentUser ? 'Your Posts' : 'Posts'}
+        </h3>
         {loading ? (
           <p className="text-gray-600">Loading your posts...</p>
         ) : userPosts.length > 0 ? (
