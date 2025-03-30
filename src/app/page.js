@@ -10,6 +10,7 @@ import { Plus, Globe, UserRound } from "lucide-react";
 import ExplorePage from "./components/explorePage";
 import LoginPage from "./components/LoginPage";
 import { ethers } from "ethers";
+import TextingComponent from "./components/TextingComponent";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -150,6 +151,7 @@ export default function Home() {
           ) : (
             <ExplorePage session={session} signer={signer} />
           )}
+          <TextingComponent userId={session.user.id} />
         </div>
       </div>
         :
