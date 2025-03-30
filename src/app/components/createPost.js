@@ -18,8 +18,7 @@ export default function CreatePost({ session }) {
     const fetchGithubCommit = async () => {
       try {
         const githubEmail = session.user.email;
-        // switch email to githubEmail
-        const commitData = await getLatestCommit(githubEmail);
+        const commitData = await getLatestCommit("charlieedoherty@gmail.com");
         
         setPost(currentPost => ({
           ...currentPost,
