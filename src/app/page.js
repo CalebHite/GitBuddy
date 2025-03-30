@@ -76,7 +76,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen p-8">
-      <div className="space-y-4">
+      {signer ?
+        <div className="space-y-4">
         <div className="flex flex-col items-center gap-4">
           {/* Tab buttons */}
           <div className="flex gap-50 mb-4">
@@ -151,6 +152,11 @@ export default function Home() {
           )}
         </div>
       </div>
+        :
+
+        <p>Connect a Wallet to Continue!</p>
+      }
+      
     </div>
   );
 }
