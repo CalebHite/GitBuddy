@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ethers } from 'ethers';
+import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 
-const UserProfile = ({ user, isCurrentUser = false }) => {
+const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
@@ -34,110 +35,16 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
   const fetchBlockchainData = async (provider) => {
     try {
       const signer = provider.getSigner();
+      
+      const contract = new ethers.Contract(
+        STREAK_CONTRACT_ADDRESS, 
+        STREAK_CONTRACT_ABI, 
+        signer
+      );
 
-      const contractAddress = "0x7410b151dd9aee17b2fa3b24d5ed7dd560632b03";
-      const abi = [
-        {
-          "inputs": [],
-          "name": "post",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "stateMutability": "nonpayable",
-          "type": "constructor"
-        },
-        {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "user",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "streakCount",
-              "type": "uint256"
-            }
-          ],
-          "name": "PostLogged",
-          "type": "event"
-        },
-        {
-          "inputs": [],
-          "name": "currentTime",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "getStreak",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [],
-          "name": "owner",
-          "outputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "",
-              "type": "address"
-            }
-          ],
-          "name": "users",
-          "outputs": [
-            {
-              "internalType": "uint256",
-              "name": "lastValidPostTime",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "streakCount",
-              "type": "uint256"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        }
-      ];
-      const contract = new ethers.Contract(contractAddress, abi, signer);
-
-      // Get user's streak from the contract
-      const userAddress = await signer.getAddress();
-      const userStreak = await contract.getStreak(userAddress);
-      setStreak(userStreak.toNumber());
+      const streakNumber = await contract.getStreak();
+      const streakValue = streakNumber.toNumber();
+      setStreak(streakValue);
     } catch (error) {
       console.error("Blockchain error:", error);
       setContractError(error.message);
@@ -213,17 +120,19 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
       {/* User Info Section */}
       <div className="flex items-center gap-4">
         <div className="relative">
-          <DotLottieReact
-            src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie"
-            loop
-            autoplay
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24"
-          />
+          {streak >= 10 && isCurrentUser && (
+            <DotLottieReact 
+              src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie" 
+              loop 
+              autoplay 
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24" 
+            />
+          )}
           {user?.image && (
-            <img
-              src={user.image}
-              alt="Profile"
-              className="w-12 h-12 rounded-full relative"
+            <img 
+              src={user.image} 
+              alt="Profile" 
+              className="w-12 h-12 rounded-full relative" 
             />
           )}
         </div>

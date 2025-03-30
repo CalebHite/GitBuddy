@@ -2,7 +2,14 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-export default function ViewPost({ post, onAvatarClick }) {
+export default function ViewPost({ post, onAvatarClick, isPersonal = false, streak = 0 }) {
+  // Add error boundary
+  if (!post) {
+    return <div className="text-center text-gray-500">No post data available</div>;
+  }
+
+  console.log("Post data in ViewPost:", post); // Debug log
+
   // Construct user object from post data
   const userInfo = {
     name: post.userName,
@@ -11,17 +18,18 @@ export default function ViewPost({ post, onAvatarClick }) {
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <div className="flex items-center gap-4">
           <div className="relative">
-
-            <DotLottieReact
-              src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie"
-              loop
-              autoplay
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24"
-            />
+            {streak >= 10 && isPersonal && (
+              <DotLottieReact
+                src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie"
+                loop
+                autoplay
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24"
+              />
+            )}
             <img
               className="w-12 h-12 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity relative"
               src={userInfo.image}
@@ -38,10 +46,10 @@ export default function ViewPost({ post, onAvatarClick }) {
       </CardHeader>
       <CardContent>
         <hr className="my-4 border-gray-200" />
-        {post.githubCommit && (
+        {post.githubCommit ? (
           <div className="mt-4 text-sm text-gray-600">
-            <p>{post.githubCommit.repository}</p>
-            <p className="font-semibold text-xl">{post.githubCommit.message}</p>
+            <p>Repository: {post.githubCommit.repository}</p>
+            <p className="font-semibold text-xl">Message: {post.githubCommit.message}</p>
             {post.githubCommit.files && post.githubCommit.files.length > 0 && (
               <>
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">
@@ -65,7 +73,14 @@ export default function ViewPost({ post, onAvatarClick }) {
               View on GitHub
             </a>
           </div>
+        ) : (
+          <p className="text-gray-500">Debug: Post data exists but no commit information found</p>
         )}
+        
+        {/* Add post date */}
+        <p className="text-sm text-gray-400 mt-4">
+          Posted: {new Date(post.date).toLocaleDateString()}
+        </p>
       </CardContent>
     </Card>
   );

@@ -7,114 +7,16 @@ import { uploadJsonToIPFS } from "../pinata"
 import { getLatestCommit } from "../github"
 import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
+import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 
-export default function CreatePost({ session }) {
+export default function CreatePost({ session, signer }) {
   const [post, setPost] = useState({
     userName: session?.user?.name || "",
     email: session?.user?.email || "",
     img: session?.user?.image || "",
     githubCommit: null
   });
-  const [walletAddress, setWalletAddress] = useState('');
-  const [contractError, setContractError] = useState(null);
-
-  const contractAddress = "0x7410b151dd9aee17b2fa3b24d5ed7dd560632b03";
-  const abi = [
-    {
-      "inputs": [],
-      "name": "post",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "user",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "streakCount",
-          "type": "uint256"
-        }
-      ],
-      "name": "PostLogged",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "currentTime",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getStreak",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "users",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "lastValidPostTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "streakCount",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchGithubCommit = async () => {
@@ -145,23 +47,6 @@ export default function CreatePost({ session }) {
     }
   }, [session]);
 
-  const connectWallet = async () => {
-    try {
-      if (!window.ethereum) {
-        throw new Error('Please install MetaMask to connect wallet');
-      }
-
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      setWalletAddress(accounts[0]);
-      return provider;
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-      setContractError(error.message);
-      return null;
-    }
-  };
-
   const handleCreatePost = async () => {
     try {
       // First, upload to IPFS
@@ -170,14 +55,11 @@ export default function CreatePost({ session }) {
         throw new Error(ipfsResponse.message);
       }
 
-      // Then interact with the smart contract
-      const provider = await connectWallet();
-      if (!provider) {
-        throw new Error("Failed to connect wallet");
-      }
-
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, abi, signer);
+      const contract = new ethers.Contract(
+        STREAK_CONTRACT_ADDRESS, 
+        STREAK_CONTRACT_ABI, 
+        signer
+      );
 
       // Call the post function on the smart contract
       const tx = await contract.post();
@@ -192,31 +74,16 @@ export default function CreatePost({ session }) {
 
     } catch (error) {
       console.error("Error creating post:", error);
-      alert(`Failed to create post: ${error.message}`);
+      setError(error.message);
     }
   };
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4">
-        {/* Wallet Connection Status */}
-        <div className="p-4 bg-gray-50 rounded-lg">
-          {!walletAddress ? (
-            <Button 
-              onClick={connectWallet}
-              className="bg-blue-500 text-white hover:bg-blue-600"
-            >
-              Connect Wallet
-            </Button>
-          ) : (
-            <div className="text-sm text-gray-600">
-              Connected: {`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}
-            </div>
-          )}
-          {contractError && (
-            <p className="text-red-500 text-sm mt-2">{contractError}</p>
-          )}
-        </div>
+        {error && (
+          <p className="text-red-500 text-sm mt-2">{error}</p>
+        )}
 
         {/* Post Preview */}
         <div className="border rounded-lg p-4">
@@ -228,7 +95,6 @@ export default function CreatePost({ session }) {
         <Button
           onClick={handleCreatePost}
           className="bg-blue-500 text-white hover:bg-blue-600"
-          disabled={!walletAddress}
         >
           Create Post
         </Button>

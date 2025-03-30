@@ -87,7 +87,7 @@ export async function uploadFileToIPFS(file, uniqueId) {
     }
 }
 
-// Fetch all pinned items from IPFS
+// Fetch all items from IPFS
 export async function fetchAllFromIPFS() {
     try {
         const response = await axios.get(
@@ -99,10 +99,23 @@ export async function fetchAllFromIPFS() {
                 }
             }
         );
-        return {
-            success: true,
-            data: response.data.rows
-        };
+
+        // Log the response for debugging
+        console.log("Pinata Response:", response.data);
+
+        // Check if the response has the expected structure
+        if (response.data && Array.isArray(response.data.rows)) {
+            return {
+                success: true,
+                data: response.data.rows // Return just the rows array
+            };
+        } else {
+            console.error("Unexpected response structure:", response.data);
+            return {
+                success: false,
+                message: "Invalid response structure from Pinata"
+            };
+        }
     } catch (error) {
         console.error('Error fetching from IPFS:', error);
         return {
@@ -115,7 +128,9 @@ export async function fetchAllFromIPFS() {
 // Fetch specific item from IPFS by hash
 export async function fetchFromIPFS(ipfsHash) {
     try {
+        console.log("Fetching from IPFS hash:", ipfsHash);
         const response = await axios.get(`https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
+        
         return {
             success: true,
             data: response.data
