@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Globe, UserRound, UserRoundX } from "lucide-react";
 import ExplorePage from "./components/explorePage";
 
 // Define UserProfile component that was missing
@@ -32,12 +32,11 @@ const UserProfile = ({ user }) => {
 };
 
 export default function Home() {
-  // Use the client-side useSession hook instead of getServerSession
   const { data: session } = useSession();
   const [ipfsId, setIpfsId] = useState("");
   const [fetchedData, setFetchedData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [activeTab, setActiveTab] = useState('explore');
 
   // Example JSON data to upload
   const exampleData = {
@@ -110,28 +109,77 @@ export default function Home() {
     }
   };
 
+  // Helper function to toggle tabs
+  const toggleTab = (tabName) => {
+    if (activeTab === tabName) {
+      setActiveTab(null);
+    } else {
+      setActiveTab(tabName);
+    }
+  };
+
   return (
     <div className="min-h-screen p-8">
       <div className="space-y-4">
         {session ? (
           <div className="flex flex-col items-center gap-4">
-            <UserProfile user={session?.user} />
-            <Button
-              onClick={() => setShowCreatePost(!showCreatePost)}
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-blue-500 text-white hover:bg-blue-600 hover:text-white cursor-pointer"
-            >
-              {showCreatePost ? (
-                <Minus className="h-4 w-4" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-            </Button>
-            
-            {showCreatePost && <CreatePost session={session} />}
-            
-            <ExplorePage />
+            {/* Tab buttons */}
+            <div className="flex gap-2">
+              <Button
+                onClick={() => toggleTab('profile')}
+                variant="outline"
+                size="icon"
+                className={`rounded-full ${
+                  activeTab === 'profile' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
+                } cursor-pointer`}
+              >
+                {activeTab === 'profile' ? (
+                  <UserRoundX className="h-4 w-4" />
+                ) : (
+                  <UserRound className="h-4 w-4" />
+                )}
+              </Button>
+
+              <Button
+                onClick={() => toggleTab('explore')}
+                variant="outline"
+                size="icon"
+                className={`rounded-full ${
+                  activeTab === 'explore' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
+                } cursor-pointer`}
+              >
+                {activeTab === 'explore' ? (
+                  <Globe className="h-4 w-4 rotate-90" />
+                ) : (
+                  <Globe className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                onClick={() => toggleTab('create')}
+                variant="outline"
+                size="icon"
+                className={`rounded-full ${
+                  activeTab === 'create' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white'
+                } cursor-pointer`}
+              >
+                {activeTab === 'create' ? (
+                  <Minus className="h-4 w-4" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            {/* Tab content */}
+            {activeTab === 'profile' && <UserProfile user={session?.user} />}
+            {activeTab === 'create' && <CreatePost session={session} />}
+            {activeTab === 'explore' && <ExplorePage />}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4 text-center min-h-screen justify-center overflow-hidden">
