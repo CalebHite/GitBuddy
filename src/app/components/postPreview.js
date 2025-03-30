@@ -42,7 +42,12 @@ export default function PostPreview({ post }) {
                     {post.githubCommit.files[post.githubCommit.files.length - 1].deletions} changes
                   </p>
                   <pre className="bg-gray-100 p-3 rounded overflow-x-auto">
-                    <code className="text-xs">{post.githubCommit.files[post.githubCommit.files.length - 1].patch}</code>
+                    <code className="text-xs">
+                      {post.githubCommit.files[post.githubCommit.files.length - 1].patch?.split('\n').slice(0, 20).join('\n')}
+                      {post.githubCommit.files[post.githubCommit.files.length - 1].patch?.split('\n').length > 30 && 
+                        '\n... (truncated)'
+                      }
+                    </code>
                   </pre>
 
                   <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-4">

@@ -61,9 +61,35 @@ export default function ViewPost({ post, onAvatarClick, isPersonal = false, stre
                   </p>
                   <pre className="bg-gray-100 p-3 rounded overflow-x-auto">
                     <code className="text-xs">
-                      {post.githubCommit.files[post.githubCommit.files.length - 1].patch}
+                      {post.githubCommit.files[post.githubCommit.files.length - 1].patch?.split('\n').slice(0, 30).join('\n')}
+                      {post.githubCommit.files[post.githubCommit.files.length - 1].patch?.split('\n').length > 30 && 
+                        '\n... (truncated)'
+                      }
                     </code>
                   </pre>
+
+                  {/* Add Gemini Summary Section */}
+                  {post.githubCommit.summary && (
+                    <div className="mt-4">
+                      <div className="flex items-center">
+                        <p className="text-md font-medium mr-2" style={{
+                          background: "linear-gradient(90deg, #8B5CF6, #3B82F6)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                          marginRight: "5px",
+                        }}>Summary</p>
+                        <img 
+                          src="/google-gemini-icon.webp" 
+                          alt="Gemini Icon" 
+                          width={20} 
+                          height={20}
+                          style={{ background: "none" }}
+                        />
+                      </div>
+                      <p className="mt-2 text-sm">{post.githubCommit.summary}</p>
+                    </div>
+                  )}
                 </div>
               </>
             )}

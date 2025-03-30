@@ -10,6 +10,7 @@ import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { useRouter } from 'next/navigation';
 import ConfettiComponent from './confetti';
+import { toast } from "sonner"
 
 
 export default function CreatePost({ session, signer, onPostCreated }) {
@@ -62,7 +63,15 @@ export default function CreatePost({ session, signer, onPostCreated }) {
   const handleCreatePost = async () => {
     try {
       setLoading(true);
-      const ipfsResponse = await uploadJsonToIPFS(post);
+      const postData = {
+        ...post,
+        githubCommit: {
+          ...post.githubCommit,
+          summary: post.githubCommit.summary
+        }
+      };
+
+      const ipfsResponse = await uploadJsonToIPFS(postData);
       if (!ipfsResponse.success) {
         throw new Error(ipfsResponse.message);
       }
@@ -76,14 +85,13 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      // alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+      toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      // alert(`Current streak: ${streak.toString()} days`);
+      setTimeout(() => toast(`Current streak: ${streak.toString()} days`), 2000);
 
-      // Call the parent function to switch tabs
       if (onPostCreated) {
         onPostCreated();
       }

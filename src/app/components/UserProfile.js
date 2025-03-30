@@ -211,6 +211,27 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
                       +{post.githubCommit.files[post.githubCommit.files.length - 1].additions}
                       -{post.githubCommit.files[post.githubCommit.files.length - 1].deletions} changes
                     </p>
+                    {post.githubCommit.summary && (
+                      <div className="mt-4">
+                        <div className="flex items-center">
+                          <p className="text-md font-medium mr-2" style={{
+                            background: "linear-gradient(90deg, #8B5CF6, #3B82F6)",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            backgroundClip: "text",
+                            marginRight: "5px",
+                          }}>Summary</p>
+                          <img 
+                            src="/google-gemini-icon.webp" 
+                            alt="Gemini Icon" 
+                            width={20} 
+                            height={20}
+                            style={{ background: "none" }}
+                          />
+                        </div>
+                        <p className="mt-2 text-sm">{post.githubCommit.summary}</p>
+                      </div>
+                    )}
                   </div>
                 )}
                 <p className="text-sm text-gray-400 mt-2">
