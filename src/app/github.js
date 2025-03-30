@@ -1,9 +1,17 @@
 import axios from 'axios';
 
+const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;  // Add your GitHub token here
+
 export async function getLatestCommit(email) {
   try {
+    // Set up headers with authentication
+    const headers = {
+      Authorization: `token ${GITHUB_TOKEN}`,
+    };
+
     // First, search for the user by email
     const searchResponse = await axios.get('https://api.github.com/search/users', {
+      headers,  // Include headers for authentication
       params: { 
         q: `${email} in:email`,
         per_page: 1
@@ -19,6 +27,7 @@ export async function getLatestCommit(email) {
 
     // Fetch all user's repositories (without sorting by 'updated')
     const reposResponse = await axios.get(`https://api.github.com/users/${username}/repos`, {
+      headers,  // Include headers for authentication
       params: { per_page: 100 }  // Fetch up to 100 repos (increase if needed)
     });
     const repos = reposResponse.data;
@@ -33,6 +42,7 @@ export async function getLatestCommit(email) {
     // Loop through each repository and fetch the latest commit from each one
     for (const repo of repos) {
       const commitsResponse = await axios.get(`https://api.github.com/repos/${username}/${repo.name}/commits`, {
+        headers,  // Include headers for authentication
         params: { per_page: 1 }
       });
       
@@ -43,7 +53,9 @@ export async function getLatestCommit(email) {
         // Compare commits to find the most recent one
         if (!latestCommit || new Date(commit.commit.author.date) > new Date(latestCommit.commitDate)) {
           // Fetch detailed commit information
-          const commitDetailsResponse = await axios.get(commit.url);
+          const commitDetailsResponse = await axios.get(commit.url, {
+            headers,  // Include headers for authentication
+          });
           const commitDetails = commitDetailsResponse.data;
 
           latestCommit = {
@@ -77,4 +89,3 @@ export async function getLatestCommit(email) {
     throw error;
   }
 }
-  
