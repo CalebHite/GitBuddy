@@ -4,32 +4,11 @@ import { uploadJsonToIPFS, fetchFromIPFSById, deleteFromIPFSById } from "./pinat
 import { useState, useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import CreatePost from "./components/createPost";
+import UserProfile from "./components/UserProfile";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus, Globe, UserRound, UserRoundX } from "lucide-react";
 import ExplorePage from "./components/explorePage";
-
-// Define UserProfile component that was missing
-const UserProfile = ({ user }) => {
-  return (
-    <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-      <div className="flex items-center gap-4">
-        {user?.image && (
-          <img src={user.image} alt="Profile" className="w-12 h-12 rounded-full" />
-        )}
-        <div>
-          <h2 className="text-xl font-semibold">{user?.name}</h2>
-          <p className="text-gray-600">{user?.email}</p>
-        </div>
-      </div>
-      <button
-        onClick={() => signOut()}
-        className="mt-4 px-4 py-2 bg-red-600 text-white rounded cursor-pointer"
-      >
-        Sign Out
-      </button>
-    </div>
-  );
-};
+import LoginPage from "./components/LoginPage";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -182,16 +161,7 @@ export default function Home() {
             {activeTab === 'explore' && <ExplorePage />}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-4 text-center min-h-screen justify-center overflow-hidden">
-            <h1 className="text-2xl font-bold">Welcome to GitBuddy</h1>
-            <h2 className="text-gray-600">Sign in with your GitHub account to get started.</h2>
-            <button
-              onClick={() => signIn('github')}
-              className="px-4 py-2 bg-gray-800 text-white rounded cursor-pointer hover:bg-gray-700 transition-colors"
-            >
-              Login
-            </button>
-          </div>
+          <LoginPage />
         )}
       </div>
     </div>
