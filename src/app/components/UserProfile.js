@@ -143,7 +143,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           <h2 className="text-xl font-semibold">{user?.name}</h2>
           <p className="text-gray-600">{user?.email}</p>
         </div>
-        <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>
+        {isCurrentUser || <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>      }
       </div>
   
       {/* Wallet Connection Section */}
