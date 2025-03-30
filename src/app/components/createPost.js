@@ -9,7 +9,6 @@ import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { useRouter } from 'next/navigation';
-import { toast } from "sonner"
 import ConfettiComponent from './confetti';
 
 
@@ -32,14 +31,8 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
+        const commitData = await getLatestCommit(githubEmail);
 
-        const accessToken = session?.user?.accessToken;
-
-        if (!accessToken) {
-          throw new Error("No GitHub access token found in session");
-        }
-
-        const commitData = await getLatestCommit(githubEmail, accessToken);
         const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
                 
         setPost(currentPost => ({
@@ -54,12 +47,13 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           },
         }));
       } catch (error) {
-        setError(`Failed to fetch commit data: ${error.message}`);
+        console.error("Error fetching GitHub commit:", error);
+        setError("Failed to fetch commit data");
       } finally {
         setLoading(false);
       }
     };
-
+  
     if (session?.user?.email) {
       fetchGithubCommit();
     }
@@ -82,13 +76,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       const tx = await contract.post();
       await tx.wait();
 
-      toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
-
+      // alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      setTimeout(() => toast(`Current streak: ${streak.toString()} days`), 2000);
+      // alert(`Current streak: ${streak.toString()} days`);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {
