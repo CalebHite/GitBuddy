@@ -90,9 +90,7 @@ export default function Home() {
 
   // Helper function to toggle tabs
   const toggleTab = (tabName) => {
-    if (activeTab === tabName) {
-      setActiveTab('explore');
-    } else {
+    if (activeTab !== tabName) {
       setActiveTab(tabName);
     }
   };
@@ -103,7 +101,7 @@ export default function Home() {
         {session ? (
           <div className="flex flex-col items-center gap-4">
             {/* Tab buttons */}
-            <div className="flex gap-50">
+            <div className="flex gap-50 mb-4">
               <Button
                 onClick={() => toggleTab('profile')}
                 variant="outline"
@@ -115,7 +113,7 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'profile' ? (
-                  <UserRoundX className="h-8 w-8" />
+                  <UserRound className="h-8 w-8" />
                 ) : (
                   <UserRound className="h-8 w-8" />
                 )}
@@ -132,7 +130,7 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'explore' ? (
-                  <Globe className="h-8 w-8 rotate-90" />
+                  <Globe className="h-8 w-8" />
                 ) : (
                   <Globe className="h-8 w-8" />
                 )}
@@ -148,7 +146,7 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'create' ? (
-                  <Minus className="h-8 w-8" />
+                  <Plus className="h-8 w-8" />
                 ) : (
                   <Plus className="h-8 w-8" />
                 )}
