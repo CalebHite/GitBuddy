@@ -8,8 +8,10 @@ import { getLatestCommit } from "../github"
 import { ethers } from "ethers"
 import { generateSummary } from "../gemini"
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
+import { useRouter } from 'next/navigation';
 
-export default function CreatePost({ session, signer }) {
+export default function CreatePost({ session, signer, onPostCreated }) {
+  const router = useRouter();
   const [post, setPost] = useState({
     userName: session?.user?.name || "",
     email: session?.user?.email || "",
@@ -17,10 +19,12 @@ export default function CreatePost({ session, signer }) {
     githubCommit: null
   });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGithubCommit = async () => {
       try {
+        setLoading(true);
         const githubEmail = session.user.email;
         const commitData = await getLatestCommit("charlieedoherty@gmail.com");
 
@@ -39,6 +43,9 @@ export default function CreatePost({ session, signer }) {
         }));
       } catch (error) {
         console.error("Error fetching GitHub commit:", error);
+        setError("Failed to fetch commit data");
+      } finally {
+        setLoading(false);
       }
     };
   
@@ -49,7 +56,7 @@ export default function CreatePost({ session, signer }) {
 
   const handleCreatePost = async () => {
     try {
-      // First, upload to IPFS
+      setLoading(true);
       const ipfsResponse = await uploadJsonToIPFS(post);
       if (!ipfsResponse.success) {
         throw new Error(ipfsResponse.message);
@@ -61,22 +68,34 @@ export default function CreatePost({ session, signer }) {
         signer
       );
 
-      // Call the post function on the smart contract
       const tx = await contract.post();
-      await tx.wait(); // Wait for transaction to be mined
+      await tx.wait();
 
-      // Show success message
       alert(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
 
-      // Optionally fetch and display updated streak
       const streak = await contract.getStreak();
       alert(`Current streak: ${streak.toString()} days`);
+
+      // Call the parent function to switch tabs
+      if (onPostCreated) {
+        onPostCreated();
+      }
 
     } catch (error) {
       console.error("Error creating post:", error);
       setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -95,8 +114,9 @@ export default function CreatePost({ session, signer }) {
         <Button
           onClick={handleCreatePost}
           className="bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+          disabled={loading}
         >
-          Create Post
+          {loading ? 'Creating Post...' : 'Create Post'}
         </Button>
       </div>
     </div>

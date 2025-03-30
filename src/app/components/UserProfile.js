@@ -165,7 +165,9 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">Current Streak:</span>
-                  <span className="text-blue-600">{streak} days</span>
+                  <span className={`${streak >= 10 ? 'text-orange-500' : 'text-blue-600'}`}>
+                    {streak} days
+                  </span>
                 </div>
               )}
             </div>
