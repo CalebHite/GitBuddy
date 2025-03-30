@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import PostPreview from "./postPreview"
 import { uploadJsonToIPFS } from "../pinata"
 import { getLatestCommit } from "../github"
@@ -25,7 +26,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
   const [loading, setLoading] = useState(true);
 
   const [celebrate, setCelebrate] = useState(false);
-
+  const [skipHours, setSkipHours] = useState(0);
 
   useEffect(() => {
     const fetchGithubCommit = async () => {
@@ -104,6 +105,22 @@ export default function CreatePost({ session, signer, onPostCreated }) {
     }
   };
 
+  const handleSkipHours = async () => {
+    try {
+      const contract = new ethers.Contract(
+        STREAK_CONTRACT_ADDRESS, 
+        STREAK_CONTRACT_ABI, 
+        signer
+      );
+
+      const tx = await contract.skipHours(skipHours);
+      await tx.wait();
+      toast(`Successfully skipped ${skipHours} hours`);
+    } catch (error) {
+      setError(`Failed to skip hours: ${error.message}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -124,9 +141,29 @@ export default function CreatePost({ session, signer, onPostCreated }) {
           <p className="text-red-500 text-sm mt-2">{error}</p>
         )}
 
-        {/* Post Preview */}
+        {/* Post Preview with Skip Hours Input */}
         <div className="border rounded-lg p-4">
-          <h2 className="text-lg font-semibold mb-4">Preview</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Preview</h2>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min="0"
+                value={skipHours}
+                onChange={(e) => setSkipHours(parseInt(e.target.value) || 0)}
+                className="w-24"
+                placeholder="Hours"
+              />
+              <Button
+                onClick={handleSkipHours}
+                variant="outline"
+                size="sm"
+                className="whitespace-nowrap"
+              >
+                Skip Hours
+              </Button>
+            </div>
+          </div>
           <PostPreview post={post} />
         </div>
 
