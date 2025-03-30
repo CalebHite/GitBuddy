@@ -12,25 +12,27 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
         const response = await fetchAllFromIPFS();
         
         if (response.success) {
-          // Filter posts by user's email in metadata and fetch content
-          const userPostPromises = response.data
-            .filter(item => {
-              // Check if the item has metadata and matches the user's email
-              console.log(item.metadata?.keyvalues?.userEmail === user?.email);
-              return item.metadata?.keyvalues?.userEmail === user?.email;
-            })
-            .map(async (item) => {
-              // Fetch the actual content for each post
+          // First fetch content for all posts
+          const postPromises = response.data.map(async (item) => {
+            try {
               const contentResponse = await fetchFromIPFS(item.ipfs_pin_hash);
               return {
                 ...contentResponse.data,
                 timestamp: item.date_pinned,
                 ipfsHash: item.ipfs_pin_hash
               };
-            });
+            } catch (error) {
+              console.error("Error fetching post content:", error);
+              return null;
+            }
+          });
 
-          const posts = await Promise.all(userPostPromises);
-          setUserPosts(posts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+          // Then filter by user email
+          const posts = (await Promise.all(postPromises))
+            .filter(post => post !== null && post.email?.toLowerCase() === user?.email?.toLowerCase())
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          
+          setUserPosts(posts);
         }
       } catch (error) {
         console.error("Error fetching user posts:", error);
@@ -46,6 +48,7 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
 
   return (
     <div className="w-full max-w-2xl mx-auto mt-4 p-4 border rounded-lg bg-gray-50">
+      <h1 className="text-3xl font-bold mb-8 text-center">My Profile</h1>
       {/* User Info Section */}
       <div className="flex items-center gap-4 mb-6">
         {user?.image && (
@@ -78,8 +81,19 @@ const UserProfile = ({ user, isCurrentUser = false }) => {
           <div className="space-y-4">
             {userPosts.map((post, index) => (
               <div key={post.ipfsHash} className="border rounded p-4 bg-white">
-                <h4 className="font-medium">{post.title}</h4>
-                <p className="text-gray-600 mt-2">{post.content}</p>
+                <h4 className="font-medium">{post.githubCommit?.repository}</h4>
+                <p className="text-gray-600 mt-2">{post.githubCommit?.message}</p>
+                {post.githubCommit?.files && post.githubCommit.files.length > 0 && (
+                  <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                    <p className="font-mono text-sm mb-2">
+                      {post.githubCommit.files[post.githubCommit.files.length - 1].filename}
+                    </p>
+                    <p className="text-xs mb-2">
+                      +{post.githubCommit.files[post.githubCommit.files.length - 1].additions}
+                      -{post.githubCommit.files[post.githubCommit.files.length - 1].deletions} changes
+                    </p>
+                  </div>
+                )}
                 <p className="text-sm text-gray-400 mt-2">
                   Posted on: {new Date(post.timestamp).toLocaleDateString()}
                 </p>

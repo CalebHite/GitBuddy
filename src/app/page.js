@@ -103,7 +103,7 @@ export default function Home() {
         {session ? (
           <div className="flex flex-col items-center gap-4">
             {/* Tab buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-50">
               <Button
                 onClick={() => toggleTab('profile')}
                 variant="outline"
@@ -115,9 +115,9 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'profile' ? (
-                  <UserRoundX className="h-4 w-4" />
+                  <UserRoundX className="h-8 w-8" />
                 ) : (
-                  <UserRound className="h-4 w-4" />
+                  <UserRound className="h-8 w-8" />
                 )}
               </Button>
 
@@ -132,9 +132,9 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'explore' ? (
-                  <Globe className="h-4 w-4 rotate-90" />
+                  <Globe className="h-8 w-8 rotate-90" />
                 ) : (
-                  <Globe className="h-4 w-4" />
+                  <Globe className="h-8 w-8" />
                 )}
               </Button>
               <Button
@@ -148,9 +148,9 @@ export default function Home() {
                 } cursor-pointer`}
               >
                 {activeTab === 'create' ? (
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-8 w-8" />
                 ) : (
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-8 w-8" />
                 )}
               </Button>
             </div>
