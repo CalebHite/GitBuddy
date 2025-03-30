@@ -6,6 +6,7 @@ import PostPreview from "./postPreview"
 import { uploadJsonToIPFS } from "../pinata"
 import { getLatestCommit } from "../github"
 import { ethers } from "ethers"
+import { generateSummary } from "../gemini"
 
 export default function CreatePost({ session }) {
   const [post, setPost] = useState({
@@ -119,8 +120,10 @@ export default function CreatePost({ session }) {
     const fetchGithubCommit = async () => {
       try {
         const githubEmail = session.user.email;
-        const commitData = await getLatestCommit(githubEmail);
-        
+        const commitData = await getLatestCommit("charlieedoherty@gmail.com");
+
+        const summary = await generateSummary(commitData.files[commitData.files.length - 1]);
+                
         setPost(currentPost => ({
           ...currentPost,
           githubCommit: {
