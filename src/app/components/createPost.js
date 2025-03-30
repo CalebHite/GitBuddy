@@ -32,6 +32,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       try {
         setLoading(true);
         const githubEmail = session.user.email;
+
         const accessToken = session?.user?.accessToken;
 
         if (!accessToken) {
@@ -82,11 +83,12 @@ export default function CreatePost({ session, signer, onPostCreated }) {
       await tx.wait();
 
       toast(`Post created successfully! IPFS Hash: ${ipfsResponse.ipfsHash}`);
+
       setCelebrate(true);
       setTimeout(() => setCelebrate(false), 3000);
 
       const streak = await contract.getStreak();
-      toast(`Current streak: ${streak.toString()} days`);
+      setTimeout(() => toast(`Current streak: ${streak.toString()} days`), 2000);
 
       // Call the parent function to switch tabs
       if (onPostCreated) {

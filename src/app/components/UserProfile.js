@@ -117,8 +117,9 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
   }, [user?.email]);
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-4 p-4 border rounded-lg bg-gray-50">
+    <div className="w-full max-w-2xl min-w-[320px] mx-auto mt-4 p-4 border rounded-lg bg-gray-50">
       <h1 className="text-3xl font-bold mb-8 text-center">{profileTitle}</h1>
+  
       {/* User Info Section */}
       <div className="flex items-center gap-4">
         <div className="relative">
@@ -132,10 +133,10 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           )}
           {user?.image && (
             <img 
-              src={user.image} 
-              alt="Profile" 
-              className="w-12 h-12 rounded-full relative" 
-            />
+            src={user.image} 
+            alt="Profile" 
+            className="w-12 h-12 rounded-full relative min-w-[3rem] min-h-[3rem] object-cover" 
+          />
           )}
         </div>
         <div>
@@ -144,7 +145,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
         </div>
         <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>
       </div>
-
+  
       {/* Wallet Connection Section */}
       {isCurrentUser && (
         <div className="mt-4 p-4 bg-blue-50 rounded-lg">
@@ -177,7 +178,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           )}
         </div>
       )}
-
+  
       {/* Only show Sign Out button if it's the current user's profile */}
       {isCurrentUser && (
         <button
@@ -187,7 +188,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           Sign Out
         </button>
       )}
-
+  
       {/* Posts Section */}
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">
@@ -223,7 +224,7 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
         )}
       </div>
     </div>
-  );
+  );  
 };
 
 export default UserProfile;
