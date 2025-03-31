@@ -78,7 +78,7 @@ export default function CreatePost({ session, signer, onPostCreated }) {
         }
       } catch (error) {
         console.error("Error fetching GitHub commit:", error);
-        setError("Failed to fetch commit data");
+        setError("Failed to fetch commit data, try a different Github account.");
       } finally {
         setLoading(false);
       }
@@ -177,35 +177,20 @@ export default function CreatePost({ session, signer, onPostCreated }) {
         isCelebrating={celebrate}
       />
       <div className="flex flex-col gap-4">
-        {error && (
-          <p className="text-red-500 text-sm mt-2">{error}</p>
-        )}
-
-        {/* Post Preview with Skip Hours Input */}
-        <div className="border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Preview</h2>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="0"
-                value={skipHours}
-                onChange={(e) => setSkipHours(parseInt(e.target.value) || 0)}
-                className="w-24"
-                placeholder="Hours"
-              />
-              <Button
-                onClick={handleSkipHours}
-                variant="outline"
-                size="sm"
-                className="whitespace-nowrap cursor-pointer"
-              >
-                Skip Hours
-              </Button>
-            </div>
+        {error ? (
+          <div className="mt-32 flex flex-col items-center justify-center text-center">
+            <p className="text-red-500 text-lg mb-8">{error}</p>
+            <img src="/not-found.png" alt="Not Found" className="mt-4" />
           </div>
-          <PostPreview post={post} />
-        </div>
+        ) : (
+          <div>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Preview</h2>
+            </div>
+            <PostPreview post={post} />
+          </div>
+        
 
         {/* Create Post Button */}
         <Button
@@ -215,6 +200,8 @@ export default function CreatePost({ session, signer, onPostCreated }) {
         >
           {loading ? 'Creating Post...' : isCommitPosted ? 'Already Posted' : 'Create Post'}
         </Button>
+        </div>
+        )}
       </div>
     </div>
   );

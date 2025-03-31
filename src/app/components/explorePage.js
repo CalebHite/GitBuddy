@@ -112,6 +112,7 @@ export default function ExplorePage({ session }) {
         <UserProfile 
           user={selectedUser} 
           isCurrentUser={session?.user?.email === selectedUser.email}
+          session={session}
         />
       </div>
     );

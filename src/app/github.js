@@ -115,3 +115,64 @@ export async function getLatestCommit(email) {
     throw new Error(`Failed to fetch GitHub commit: ${error.message}`);
   }
 }
+
+// Check if userA is following userB
+export async function isFollowingUser(userA, userB) {
+  try {
+    const response = await axios.get(`https://api.github.com/users/${userA}/following/${userB}`, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+      }
+    });
+    // If the request is successful (status 204), userA is following userB
+    return response.status === 204;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // 404 means userA is not following userB
+      return false;
+    }
+    throw new Error(`Failed to check following status: ${error.message}`);
+  }
+}
+
+// Make userA follow userB
+export async function followUser(username) {
+  try {
+    // The username should be passed exactly as it appears in GitHub's URL format
+    const response = await axios.put(
+      `https://api.github.com/user/following/${username}`,
+      {},  // empty body
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      }
+    );
+    return response.status === 204;  // GitHub returns 204 on success
+  } catch (error) {
+    console.error('GitHub API Error:', error.response?.data || error.message);
+    throw new Error('Failed to follow user: ' + (error.response?.data?.message || error.message));
+  }
+}
+
+// Create a comment on a commit
+export async function commentOnCommit(owner, repo, commitSha, comment) {
+  try {
+    const response = await axios.post(
+      `https://api.github.com/repos/${owner}/${repo}/commits/${commitSha}/comments`,
+      {
+        body: comment
+      },
+      {
+        headers: {
+          Authorization: `token ${GITHUB_TOKEN}`,
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(`Failed to create commit comment: ${error.message}`);
+  }
+}
+

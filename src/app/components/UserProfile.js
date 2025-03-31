@@ -1,24 +1,20 @@
 import { useEffect, useState } from 'react';
 import { fetchAllFromIPFS, fetchFromIPFS } from '../pinata';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
-import { checkAndFollowUser } from '../github';
 import { ethers } from 'ethers';
+import { isFollowingUser, followUser } from '../github';
 import { STREAK_CONTRACT_ADDRESS, STREAK_CONTRACT_ABI } from '../contracts/streakContract';
 import { UserPlus, MessageCirclePlus } from "lucide-react";
-import TextingComponent from './TextingComponent';
 import { signOut } from "next-auth/react";
 
-const UserProfile = ({ user, isCurrentUser = false, signer }) => {
+const UserProfile = ({ user, isCurrentUser = false, signer, session }) => {
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
   const [contractError, setContractError] = useState(null);
   const [walletAddress, setWalletAddress] = useState('');
-  const [showTextingComponent, setShowTextingComponent] = useState(false);
-
-  const toggleTextingComponent = () => {
-    setShowTextingComponent(prev => !prev);
-  };
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const profileTitle = isCurrentUser ? 'My Profile' : `${user?.name}'s Profile`;
 
@@ -54,7 +50,6 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
       const streakNumber = await contract.getStreak();
       const streakValue = streakNumber.toNumber();
       setStreak(streakValue);
-      setStreak(10);
     } catch (error) {
       console.error("Blockchain error:", error);
       setContractError(error.message);
@@ -124,6 +119,36 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
     }
   }, [user?.email]);
 
+  useEffect(() => {
+    const checkFollowingStatus = async () => {
+      if (!isCurrentUser && user?.email && session?.user?.name) {
+        try {
+          const following = await isFollowingUser(session.user.name, user.name);
+          setIsFollowing(following);
+        } catch (error) {
+          console.error('Error checking following status:', error);
+        }
+      }
+    };
+
+    checkFollowingStatus();
+  }, [user?.name, user?.email, isCurrentUser, session?.user?.name]);
+
+  const checkAndFollowUser = async () => {
+    console.log(session);
+    
+    try {
+      setFollowLoading(true);
+      await followUser(user.login || user.name); // Use user.login if available, fallback to name
+      setIsFollowing(true);
+    } catch (error) {
+      console.error('Error following user:', error);
+      // Optionally show error to user via toast or alert
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl min-w-[320px] mx-auto mt-4 p-4 border rounded-lg bg-gray-50">
       <h1 className="text-3xl font-bold mb-8 text-center">{profileTitle}</h1>
@@ -151,8 +176,18 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
           <h2 className="text-xl font-semibold">{user?.name}</h2>
           <p className="text-gray-600">{user?.email}</p>
         </div>
-        {isCurrentUser || <button onClick={checkAndFollowUser}><UserPlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>      }
-        {isCurrentUser || <button onClick={toggleTextingComponent}><MessageCirclePlus className="h-10 w-10 border rounded-full p-2 hover:bg-gray-100 cursor-pointer" /></button>}
+        {!isCurrentUser && (
+          <button 
+            onClick={checkAndFollowUser}
+            disabled={followLoading || isFollowing}
+            className="flex items-center gap-2 p-2 border rounded-full hover:bg-gray-100 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <UserPlus className="h-6 w-6" />
+            <span className="text-sm">
+              {followLoading ? 'Following...' : isFollowing ? 'Following' : 'Follow'}
+            </span>
+          </button>
+        )}
       </div>
   
       {/* Wallet Connection Section */}
@@ -185,12 +220,6 @@ const UserProfile = ({ user, isCurrentUser = false, signer }) => {
               )}
             </div>
           )}
-        </div>
-      )}
-
-      {showTextingComponent && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <TextingComponent userId={walletAddress} otherUserId={user?.githubUsername} />
         </div>
       )}
   

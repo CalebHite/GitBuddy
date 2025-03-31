@@ -3,6 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 export default function ViewPost({ post, onAvatarClick, isPersonal = false, streak = 0 }) {
+  // Add ref for the card
+  const cardRef = React.useRef(null);
+
+  // Update scroll to bottom function
+  const scrollToBottom = () => {
+    if (cardRef.current) {
+      cardRef.current.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  };
+
   // Add error boundary
   if (!post) {
     return <div className="text-center text-gray-500">No post data available</div>;
@@ -16,30 +29,51 @@ export default function ViewPost({ post, onAvatarClick, isPersonal = false, stre
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full" ref={cardRef}>
       <CardHeader>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            {streak >= 10 && isPersonal && (
-              <DotLottieReact
-                src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie"
-                loop
-                autoplay
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24"
+        <div className="flex justify-between items-start w-full">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              {streak >= 10 && isPersonal && (
+                <DotLottieReact
+                  src="https://lottie.host/ff8f0355-d3cc-4f44-9036-4869392d6c0a/gwXqvhcWei.lottie"
+                  loop
+                  autoplay
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-[72%] w-24 h-24"
+                />
+              )}
+              <img
+                className="w-12 h-12 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity relative"
+                src={userInfo.image}
+                alt={userInfo.name}
+                onClick={() => onAvatarClick(userInfo)}
+                title="Click to view profile"
               />
-            )}
-            <img
-              className="w-12 h-12 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity relative"
-              src={userInfo.image}
-              alt={userInfo.name}
-              onClick={() => onAvatarClick(userInfo)}
-              title="Click to view profile"
-            />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-semibold">{userInfo.name}</CardTitle>
+              <h3 className="text-sm text-gray-600">{userInfo.email}</h3>
+            </div>
           </div>
-          <div>
-            <CardTitle className="text-xl font-semibold">{userInfo.name}</CardTitle>
-            <h3 className="text-sm text-gray-600">{userInfo.email}</h3>
-          </div>
+          <button
+            onClick={scrollToBottom}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+            title="Scroll to bottom"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14M19 12l-7 7-7-7" />
+            </svg>
+          </button>
         </div>
       </CardHeader>
       <CardContent>
